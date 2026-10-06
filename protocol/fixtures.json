@@ -287,5 +287,39 @@
       "rotation_id": "rot_too-short",
       "credential": "vgs_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     }
+  },
+  {
+    "name": "site rotation result valid",
+    "contract": "SiteRotationResult",
+    "valid": true,
+    "document": {
+      "site_id": "sit_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "name": "Office",
+      "protocol_version": "vgpu.site.v1",
+      "state": "active",
+      "credential_expires_at": 1800000000,
+      "consumption_enabled": false,
+      "contribution_enabled": false,
+      "rotation_id": "rot_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "site rotation result rejects missing acknowledgement identity",
+    "contract": "SiteRotationResult",
+    "valid": false,
+    "path": "/rotation_id",
+    "document": {
+      "site_id": "sit_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "name": "Office",
+      "protocol_version": "vgpu.site.v1",
+      "state": "active",
+      "credential_expires_at": 1800000000,
+      "consumption_enabled": false,
+      "contribution_enabled": false
+    }
   }
 ]
