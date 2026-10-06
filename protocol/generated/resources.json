@@ -1,0 +1,426 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "resources.json",
+    "$defs": {
+        "BackendCapabilities": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "BackendCapabilities.json",
+            "type": "object",
+            "properties": {
+                "provider": {
+                    "$ref": "BackendProvider.json"
+                },
+                "engine": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "skypilot"
+                        },
+                        {
+                            "type": "string",
+                            "const": "theta_api"
+                        },
+                        {
+                            "type": "string",
+                            "const": "kubernetes"
+                        },
+                        {
+                            "type": "string",
+                            "const": "simulator"
+                        }
+                    ]
+                },
+                "allocation_modes": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "const": "whole_device"
+                            },
+                            {
+                                "type": "string",
+                                "const": "mig"
+                            },
+                            {
+                                "type": "string",
+                                "const": "software_shared"
+                            }
+                        ]
+                    },
+                    "minItems": 1
+                },
+                "supports_multi_node": {
+                    "type": "boolean"
+                },
+                "supports_stop": {
+                    "type": "boolean"
+                },
+                "supports_spot": {
+                    "type": "boolean"
+                },
+                "guaranteed_notice_seconds": {
+                    "$ref": "NonnegativeInteger.json"
+                },
+                "create_idempotency": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "native"
+                        },
+                        {
+                            "type": "string",
+                            "const": "reconcile_before_retry"
+                        }
+                    ]
+                },
+                "workload_isolation": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "owner_only"
+                        },
+                        {
+                            "type": "string",
+                            "const": "qualified_multitenant"
+                        }
+                    ]
+                },
+                "evidence": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "simulated"
+                        },
+                        {
+                            "type": "string",
+                            "const": "source_reviewed"
+                        },
+                        {
+                            "type": "string",
+                            "const": "live_verified"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "provider",
+                "engine",
+                "allocation_modes",
+                "supports_multi_node",
+                "supports_stop",
+                "supports_spot",
+                "guaranteed_notice_seconds",
+                "create_idempotency",
+                "workload_isolation",
+                "evidence"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "BackendProvider": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "BackendProvider.json",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "const": "vast"
+                },
+                {
+                    "type": "string",
+                    "const": "runpod"
+                },
+                {
+                    "type": "string",
+                    "const": "theta"
+                },
+                {
+                    "type": "string",
+                    "const": "kubernetes"
+                },
+                {
+                    "type": "string",
+                    "const": "simulator"
+                }
+            ]
+        },
+        "NonnegativeInteger": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "NonnegativeInteger.json",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+        },
+        "BackendRequest": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "BackendRequest.json",
+            "type": "object",
+            "properties": {
+                "tenant_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "project_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "account_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "operation_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "generation": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "provider": {
+                    "$ref": "BackendProvider.json"
+                },
+                "image": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "gpu_model": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "gpu_count": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "num_nodes": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "region": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "capacity_mode": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "on_demand"
+                        },
+                        {
+                            "type": "string",
+                            "const": "spot"
+                        }
+                    ]
+                },
+                "workload_trust": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "owner"
+                        },
+                        {
+                            "type": "string",
+                            "const": "untrusted"
+                        }
+                    ]
+                },
+                "max_hourly_price_microusd": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "command": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": [
+                "tenant_id",
+                "project_id",
+                "account_id",
+                "operation_id",
+                "generation",
+                "provider",
+                "image",
+                "gpu_model",
+                "gpu_count",
+                "num_nodes",
+                "region",
+                "capacity_mode",
+                "workload_trust",
+                "max_hourly_price_microusd",
+                "command"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "BackendIdentifier": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "BackendIdentifier.json",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+        },
+        "PositiveInteger": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "PositiveInteger.json",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+        },
+        "BackendObservation": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "BackendObservation.json",
+            "type": "object",
+            "properties": {
+                "tenant_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "project_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "account_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "operation_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "provider": {
+                    "$ref": "BackendProvider.json"
+                },
+                "resource_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "generation": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "revision": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "state": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "provisioning"
+                        },
+                        {
+                            "type": "string",
+                            "const": "running"
+                        },
+                        {
+                            "type": "string",
+                            "const": "paused"
+                        },
+                        {
+                            "type": "string",
+                            "const": "lost"
+                        },
+                        {
+                            "type": "string",
+                            "const": "released"
+                        },
+                        {
+                            "type": "string",
+                            "const": "unknown"
+                        }
+                    ]
+                },
+                "supplier_state": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "allocated"
+                        },
+                        {
+                            "type": "string",
+                            "const": "released"
+                        },
+                        {
+                            "type": "string",
+                            "const": "unknown"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "tenant_id",
+                "project_id",
+                "account_id",
+                "operation_id",
+                "provider",
+                "resource_id",
+                "generation",
+                "revision",
+                "state",
+                "supplier_state"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "BurstPolicy": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "BurstPolicy.json",
+            "type": "object",
+            "properties": {
+                "mode": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "disabled"
+                        },
+                        {
+                            "type": "string",
+                            "const": "manual"
+                        },
+                        {
+                            "type": "string",
+                            "const": "automatic"
+                        }
+                    ]
+                },
+                "allowed_providers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "BackendProvider.json"
+                    }
+                },
+                "allowed_regions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "max_hourly_price_microusd": {
+                    "$ref": "NonnegativeInteger.json"
+                },
+                "max_total_spend_microusd": {
+                    "$ref": "NonnegativeInteger.json"
+                },
+                "max_concurrent_remote_jobs": {
+                    "$ref": "NonnegativeInteger.json"
+                },
+                "local_wait_seconds": {
+                    "$ref": "NonnegativeInteger.json"
+                },
+                "data_policy": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "local_only"
+                        },
+                        {
+                            "type": "string",
+                            "const": "artifacts_only"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "mode",
+                "allowed_providers",
+                "allowed_regions",
+                "max_hourly_price_microusd",
+                "max_total_spend_microusd",
+                "max_concurrent_remote_jobs",
+                "local_wait_seconds",
+                "data_policy"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        }
+    }
+}

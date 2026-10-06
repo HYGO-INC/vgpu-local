@@ -1,0 +1,11 @@
+.venv/
+node_modules/
+__pycache__/
+.pytest_cache/
+.generated-check/
+dist/
+*.db
+*.db-*
+.env
+.env.*
+*.log

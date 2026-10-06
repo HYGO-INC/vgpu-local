@@ -1,0 +1,7 @@
+{
+  "items": [
+    {"metadata":{"name":"home-4090","labels":{"nvidia.com/gpu.product":"NVIDIA-GeForce-RTX-4090"}},"status":{"allocatable":{"nvidia.com/gpu":"2"},"conditions":[{"type":"Ready","status":"True"}]}},
+    {"metadata":{"name":"office-5090","labels":{"nvidia.com/gpu.product":"NVIDIA-GeForce-RTX-5090"}},"status":{"allocatable":{"nvidia.com/gpu":"1"},"conditions":[{"type":"Ready","status":"True"}]}},
+    {"metadata":{"name":"enterprise-partitions","labels":{"nvidia.com/gpu.product":"qualified-MIG-device"}},"status":{"allocatable":{"nvidia.com/mig-1g.10gb":"7"},"conditions":[{"type":"Ready","status":"True"}]}}
+  ]
+}

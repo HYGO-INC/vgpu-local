@@ -1,0 +1,320 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "vgpu public backend protocol (experimental)",
+    "version": "0.0.0"
+  },
+  "tags": [],
+  "paths": {},
+  "components": {
+    "schemas": {
+      "BackendCapabilities": {
+        "type": "object",
+        "required": [
+          "provider",
+          "engine",
+          "allocation_modes",
+          "supports_multi_node",
+          "supports_stop",
+          "supports_spot",
+          "guaranteed_notice_seconds",
+          "create_idempotency",
+          "workload_isolation",
+          "evidence"
+        ],
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/BackendProvider"
+          },
+          "engine": {
+            "type": "string",
+            "enum": [
+              "skypilot",
+              "theta_api",
+              "kubernetes",
+              "simulator"
+            ]
+          },
+          "allocation_modes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "whole_device",
+                "mig",
+                "software_shared"
+              ]
+            },
+            "minItems": 1
+          },
+          "supports_multi_node": {
+            "type": "boolean"
+          },
+          "supports_stop": {
+            "type": "boolean"
+          },
+          "supports_spot": {
+            "type": "boolean"
+          },
+          "guaranteed_notice_seconds": {
+            "$ref": "#/components/schemas/NonnegativeInteger"
+          },
+          "create_idempotency": {
+            "type": "string",
+            "enum": [
+              "native",
+              "reconcile_before_retry"
+            ]
+          },
+          "workload_isolation": {
+            "type": "string",
+            "enum": [
+              "owner_only",
+              "qualified_multitenant"
+            ]
+          },
+          "evidence": {
+            "type": "string",
+            "enum": [
+              "simulated",
+              "source_reviewed",
+              "live_verified"
+            ]
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "BackendIdentifier": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 255
+      },
+      "BackendObservation": {
+        "type": "object",
+        "required": [
+          "tenant_id",
+          "project_id",
+          "account_id",
+          "operation_id",
+          "provider",
+          "resource_id",
+          "generation",
+          "revision",
+          "state",
+          "supplier_state"
+        ],
+        "properties": {
+          "tenant_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "project_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "account_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "operation_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/BackendProvider"
+          },
+          "resource_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "generation": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "revision": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "provisioning",
+              "running",
+              "paused",
+              "lost",
+              "released",
+              "unknown"
+            ]
+          },
+          "supplier_state": {
+            "type": "string",
+            "enum": [
+              "allocated",
+              "released",
+              "unknown"
+            ]
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "BackendProvider": {
+        "type": "string",
+        "enum": [
+          "vast",
+          "runpod",
+          "theta",
+          "kubernetes",
+          "simulator"
+        ]
+      },
+      "BackendRequest": {
+        "type": "object",
+        "required": [
+          "tenant_id",
+          "project_id",
+          "account_id",
+          "operation_id",
+          "generation",
+          "provider",
+          "image",
+          "gpu_model",
+          "gpu_count",
+          "num_nodes",
+          "region",
+          "capacity_mode",
+          "workload_trust",
+          "max_hourly_price_microusd",
+          "command"
+        ],
+        "properties": {
+          "tenant_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "project_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "account_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "operation_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "generation": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/BackendProvider"
+          },
+          "image": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "gpu_model": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "gpu_count": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "num_nodes": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "region": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "capacity_mode": {
+            "type": "string",
+            "enum": [
+              "on_demand",
+              "spot"
+            ]
+          },
+          "workload_trust": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "untrusted"
+            ]
+          },
+          "max_hourly_price_microusd": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "command": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "BurstPolicy": {
+        "type": "object",
+        "required": [
+          "mode",
+          "allowed_providers",
+          "allowed_regions",
+          "max_hourly_price_microusd",
+          "max_total_spend_microusd",
+          "max_concurrent_remote_jobs",
+          "local_wait_seconds",
+          "data_policy"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "disabled",
+              "manual",
+              "automatic"
+            ]
+          },
+          "allowed_providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BackendProvider"
+            }
+          },
+          "allowed_regions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "max_hourly_price_microusd": {
+            "$ref": "#/components/schemas/NonnegativeInteger"
+          },
+          "max_total_spend_microusd": {
+            "$ref": "#/components/schemas/NonnegativeInteger"
+          },
+          "max_concurrent_remote_jobs": {
+            "$ref": "#/components/schemas/NonnegativeInteger"
+          },
+          "local_wait_seconds": {
+            "$ref": "#/components/schemas/NonnegativeInteger"
+          },
+          "data_policy": {
+            "type": "string",
+            "enum": [
+              "local_only",
+              "artifacts_only"
+            ]
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "NonnegativeInteger": {
+        "type": "integer",
+        "format": "int64",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      "PositiveInteger": {
+        "type": "integer",
+        "format": "int64",
+        "minimum": 1,
+        "maximum": 9007199254740991
+      }
+    }
+  }
+}

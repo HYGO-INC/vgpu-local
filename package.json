@@ -1,0 +1,19 @@
+{
+  "name": "vgpu-local-protocol",
+  "version": "0.1.0-alpha.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.1",
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "check": "node scripts/generate.mjs --check && uv run --locked pytest"
+  },
+  "devDependencies": {
+    "@typespec/compiler": "1.16.0",
+    "@typespec/http": "1.16.0",
+    "@typespec/json-schema": "1.16.0",
+    "@typespec/openapi": "1.16.0",
+    "@typespec/openapi3": "1.16.0",
+    "ajv": "8.20.0",
+    "openapi-typescript": "7.13.0"
+  }
+}
