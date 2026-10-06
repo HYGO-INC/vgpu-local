@@ -5,7 +5,8 @@
 Use `vgpu_local.skypilot_backend.SkyPilotBackend` from an isolated execution
 environment containing `skypilot[vast,runpod]==0.14.0`. The core local package does
 not install or start the cloud engine. Keep provider accounts and their SkyPilot
-server state isolated between credential domains.
+server state isolated between credential domains. A production adapter requires
+an explicit `account_id` binding and refuses a request for another account.
 
 The adapter builds a provider-specific task, preserves a durable operation scope
 (tenant/project/account/provider/operation/generation), and records its intent in
@@ -14,6 +15,21 @@ different requests under the same identity fail. A lost reply becomes uncertain.
 Known SkyPilot request IDs can be reconciled without another launch. If the SDK
 submission reply itself is lost, supplier inventory reconciliation is still needed;
 the adapter refuses a second launch. Do not delete the journal to force a retry.
+
+`observe` forces a fresh, exact-cluster status query without returning SSH
+credentials. `UP` means capacity is running; `STOPPED` still represents an
+allocated resource. `INIT`, an omitted cluster and a failed read are uncertain,
+not proof of teardown. Observations use durable poll ordering: a late response
+cannot replace newer evidence, and confirmed teardown dominates an in-flight
+health reply. Capacity health does not establish workload completion or a
+supplier invoice cutoff. `scripts/qualify-skypilot.py` checks the real SDK
+signature and request model without starting its server or calling a provider.
+SkyPilot 0.14.0's request model takes the `FORCE` refresh mode, despite a stale
+`refresh=True` example in its SDK docstring.
+On 6 October 2026 the qualification passed in an isolated Linux installation of
+the published `skypilot==0.14.0` package, with zero provider calls. The offline
+adapter tests also cover concurrent teardown, late status replies and failed
+newer polls. These checks do not certify live Vast/Runpod provisioning.
 
 The adapter is restricted to single-node owner workloads. The reviewed provider
 paths do not implement multi-node execution. Runpod's SkyPilot path does not
