@@ -1,4 +1,5 @@
 // Connection enrollment is independent of cloud consumption and contribution.
+using TypeSpec.Http;
 namespace Vgpu.V1;
 
 @pattern("^sit_[a-f0-9]{32}(?![\\s\\S])")
@@ -29,4 +30,33 @@ model SiteConnection {
   credential_expires_at: NonnegativeInteger;
   consumption_enabled: false;
   contribution_enabled: false;
+}
+
+model ProtocolError {
+  @pattern("^[a-z][a-z0-9_]{0,63}(?![\\s\\S])")
+  error: string;
+}
+
+alias FederationErrorResponse = {
+  @statusCode statusCode: 400 | 401 | 403 | 404 | 409 | 413 | 415 | 503;
+  @body body: ProtocolError;
+};
+
+@useAuth(BearerAuth)
+@route("/api/v1/tenants/{tenant_id}/projects/{project_id}/sites")
+interface SiteFederation {
+  // Enrollment requires a user session and manage_sites permission.
+  @post enroll(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier,
+    @body enrollment: SiteEnrollment): { @statusCode statusCode: 201; @body body: SiteConnection } | FederationErrorResponse;
+
+  // Connection calls accept only this installation's scoped credential.
+  @get @route("/{site_id}/connection")
+  connection(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier, @path site_id: SiteId): SiteConnection | FederationErrorResponse;
+
+  @post @route("/{site_id}/connection/revoke")
+  disconnect(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier, @path site_id: SiteId): SiteConnection | FederationErrorResponse;
+
+  // Owner revocation requires a user session and manage_sites permission.
+  @post @route("/{site_id}/revoke")
+  revoke(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier, @path site_id: SiteId): SiteConnection | FederationErrorResponse;
 }

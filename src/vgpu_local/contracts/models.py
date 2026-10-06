@@ -9,6 +9,14 @@ from pydantic import ConfigDict, Field
 from vgpu_local.contracts.base import ContractModel
 
 
+class ProtocolError(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+        regex_engine="python-re",
+    )
+    error: str = Field(..., pattern='^[a-z][a-z0-9_]{0,63}(?![\\s\\S])')
+
+
 class BackendCapabilities(ContractModel):
     model_config = ConfigDict(
         extra='forbid',

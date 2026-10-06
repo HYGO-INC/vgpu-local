@@ -241,5 +241,22 @@
       "consumption_enabled": false,
       "contribution_enabled": true
     }
+  },
+  {
+    "name": "protocol error valid",
+    "contract": "ProtocolError",
+    "valid": true,
+    "document": {
+      "error": "unauthorized"
+    }
+  },
+  {
+    "name": "protocol error rejects text",
+    "contract": "ProtocolError",
+    "valid": false,
+    "path": "/error",
+    "document": {
+      "error": "provider credentials: value"
+    }
   }
 ]

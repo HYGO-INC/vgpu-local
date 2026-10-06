@@ -530,6 +530,23 @@
             "unevaluatedProperties": {
                 "not": {}
             }
+        },
+        "ProtocolError": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "ProtocolError.json",
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]{0,63}(?![\\s\\S])"
+                }
+            },
+            "required": [
+                "error"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
         }
     }
 }
