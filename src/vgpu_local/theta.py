@@ -5,11 +5,11 @@ from urllib.parse import quote
 import httpx
 
 from .errors import OutcomeUnknown
-from .journal import Journal, fingerprint
+from .journal import ReceiptStore, fingerprint
 
 
 class ThetaClient:
-    def __init__(self, project_id: str, api_key: str, journal: Journal, *, transport=None):
+    def __init__(self, project_id: str, api_key: str, journal: ReceiptStore, *, transport=None):
         if not re.fullmatch(r"[A-Za-z0-9_-]{1,255}", project_id) or not api_key:
             raise ValueError("project ID and project-scoped API key are required")
         self.project_id, self.journal = project_id, journal

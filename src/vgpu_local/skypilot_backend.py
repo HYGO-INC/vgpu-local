@@ -5,7 +5,7 @@ import shlex
 
 from .contracts.models import BackendRequest
 from .errors import OutcomeUnknown, UnsupportedCapability
-from .journal import Journal, scope
+from .journal import ReceiptStore, scope
 
 
 def task_config(request: BackendRequest) -> dict:
@@ -32,7 +32,7 @@ def task_config(request: BackendRequest) -> dict:
 
 
 class SkyPilotBackend:
-    def __init__(self, journal: Journal, sdk=None):
+    def __init__(self, journal: ReceiptStore, sdk=None):
         if sdk is None:
             if importlib.metadata.version("skypilot") != "0.14.0":
                 raise UnsupportedCapability("use the reviewed SkyPilot 0.14.0 worker environment")

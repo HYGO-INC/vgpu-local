@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from .contracts.models import BackendObservation, BackendRequest
 from .errors import OutcomeUnknown
-from .journal import Journal, scope
+from .journal import ReceiptStore, scope
 
 
 @dataclass(frozen=True)
@@ -13,7 +13,7 @@ class Faults:
 
 
 class Simulator:
-    def __init__(self, journal: Journal, faults: Faults = Faults()):
+    def __init__(self, journal: ReceiptStore, faults: Faults = Faults()):
         self.journal, self.faults = journal, faults
 
     def provision(self, request: BackendRequest) -> BackendObservation:

@@ -4,10 +4,25 @@ import hashlib
 import json
 from pathlib import Path
 import sqlite3
+from typing import Callable, Protocol
 
 import rfc8785
 
 from .errors import KeyConflict
+
+
+class ReceiptStore(Protocol):
+    """Atomic backend receipt boundary; shared services may supply another store.
+
+    begin must commit before returning a winning create claim. change must lock
+    the receipt until its transaction commits. A missing read is KeyError;
+    connection failures and malformed receipts must never be reported as missing.
+    Receipts must not expire while an allocation can still exist.
+    """
+    def begin(self, key: str, request: dict, initial: dict) -> tuple[bool, dict]: ...
+    def read(self, key: str) -> dict: ...
+    def change(self, key: str, update: Callable[[dict], dict]) -> dict: ...
+    def transition(self, key: str, expected: str, state: str) -> tuple[bool, dict]: ...
 
 
 def fingerprint(value: dict) -> str:
