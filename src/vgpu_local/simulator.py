@@ -80,6 +80,23 @@ class Simulator:
             return row
         self.journal.change(scope(request), update)
 
+    def finish_workload(self, request: BackendRequest, state: str = "succeeded"):
+        """A job result is separate from capacity; the caller must still release."""
+        if state not in {"succeeded", "failed", "canceled"}: raise ValueError("invalid workload result")
+        self._owned(request)
+        def update(row):
+            observation = row["observation"]
+            if observation.get("workload"):
+                if observation["workload"]["state"] != state: raise ValueError("terminal workload cannot change")
+                return row
+            if observation["state"] != "running": raise ValueError("only a running allocation can finish work")
+            row["previous"] = dict(observation)
+            row["observation"] = {**observation, "revision":observation["revision"]+1,
+                                  "workload":{"job_id":"job-"+scope(request)[:20], "state":state}}
+            self._event(row, "workload_finished", state=state)
+            return row
+        self.journal.change(scope(request), update)
+
     def release(self, request: BackendRequest):
         self._owned(request)
         def update(row):

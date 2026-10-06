@@ -332,6 +332,9 @@
                             "const": "unknown"
                         }
                     ]
+                },
+                "workload": {
+                    "$ref": "BackendWorkloadStatus.json"
                 }
             },
             "required": [
@@ -345,6 +348,51 @@
                 "revision",
                 "state",
                 "supplier_state"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "BackendWorkloadStatus": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "BackendWorkloadStatus.json",
+            "type": "object",
+            "properties": {
+                "job_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "state": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "queued"
+                        },
+                        {
+                            "type": "string",
+                            "const": "running"
+                        },
+                        {
+                            "type": "string",
+                            "const": "succeeded"
+                        },
+                        {
+                            "type": "string",
+                            "const": "failed"
+                        },
+                        {
+                            "type": "string",
+                            "const": "canceled"
+                        },
+                        {
+                            "type": "string",
+                            "const": "unknown"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "job_id",
+                "state"
             ],
             "unevaluatedProperties": {
                 "not": {}

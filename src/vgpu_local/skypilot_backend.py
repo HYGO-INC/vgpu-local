@@ -63,10 +63,10 @@ class SkyPilotBackend:
         try:
             request_id = self.sdk.launch(task, cluster_name=receipt["cluster_name"], retry_until_up=False)
             self.journal.change(key, lambda row: {**row, "request_id": str(request_id)})
-            self.sdk.get(request_id)
+            result = self.sdk.get(request_id)
         except Exception as exc:
             raise OutcomeUnknown("SkyPilot create may have succeeded; reconcile the recorded request") from exc
-        return self.journal.transition(key, "uncertain", "ready")[1]
+        return self._ready(request, result)
 
     def reconcile(self, request: BackendRequest) -> dict:
         receipt = self._owned(request)
@@ -75,10 +75,25 @@ class SkyPilotBackend:
         if receipt["state"] != "uncertain" or "request_id" not in receipt:
             raise OutcomeUnknown("requires supplier inventory reconciliation; absence from SkyPilot is insufficient")
         try:
-            self.sdk.get(receipt["request_id"])
+            result = self.sdk.get(receipt["request_id"])
         except Exception as exc:
             raise OutcomeUnknown("recorded SkyPilot operation remains unresolved") from exc
-        return self.journal.transition(scope(request), "uncertain", "ready")[1]
+        return self._ready(request, result)
+
+    def _ready(self, request, result):
+        # SkyPilot launch returns (job ID or None, handle). Never serialize the
+        # handle, which can contain provider/connection details.
+        if not isinstance(result, (tuple, list)) or len(result) != 2:
+            raise OutcomeUnknown("SkyPilot launch result has an unverified shape")
+        job_id = result[0]
+        if job_id is not None and (type(job_id) is not int or not 1 <= job_id <= 9007199254740991):
+            raise OutcomeUnknown("SkyPilot launch returned an invalid job identity")
+        def update(row):
+            if row["state"] == "uncertain":
+                row["state"] = "ready"
+                if job_id is not None: row["job_id"] = job_id
+            return row
+        return self.journal.change(scope(request), update)
 
     def _owned(self, request: BackendRequest) -> dict:
         self._account(request)
@@ -96,7 +111,7 @@ class SkyPilotBackend:
         receipt = self._owned(request)
         key = scope(request)
         ticket = self.journal.change(key, lambda row: {**row, "observation_poll": row.get("observation_poll", 0) + 1})["observation_poll"]
-        state, supplier = "unknown", "unknown"
+        state, supplier, workload = "unknown", "unknown", None
         if receipt["state"] == "released":
             state, supplier = "released", "released"
         elif receipt["state"] == "ready":
@@ -117,12 +132,28 @@ class SkyPilotBackend:
                     if status == "UP": state, supplier = "running", "allocated"
                     elif status == "STOPPED": state, supplier = "paused", "allocated"
                     elif status != "INIT": raise ValueError("unknown SkyPilot status")
+                if state == "running" and "job_id" in receipt:
+                    workload = self._workload(receipt)
             except Exception as exc:
                 self._observation(request, ticket, "unknown", "unknown")
                 raise OutcomeUnknown("fresh SkyPilot status is unavailable or unverified") from exc
-        return self._observation(request, ticket, state, supplier)
+        return self._observation(request, ticket, state, supplier, workload)
 
-    def _observation(self, request, ticket, state, supplier):
+    def _workload(self, receipt):
+        job_id = receipt["job_id"]
+        response = self.sdk.job_status(receipt["cluster_name"], job_ids=[job_id])
+        states = self.sdk.get(response)
+        if not isinstance(states, Mapping) or len(states) != 1 or any(type(key) is not int or key != job_id for key in states):
+            raise ValueError("job status identity mismatch")
+        status = states[job_id]
+        status = status.value if hasattr(status, "value") else status
+        normalized = {None:"unknown", "INIT":"queued", "PENDING":"queued", "SETTING_UP":"queued",
+                      "RUNNING":"running", "SUCCEEDED":"succeeded", "FAILED":"failed",
+                      "FAILED_SETUP":"failed", "FAILED_DRIVER":"failed", "CANCELLED":"canceled"}
+        if status not in normalized: raise ValueError("unknown SkyPilot job status")
+        return {"job_id":str(job_id), "state":normalized[status]}
+
+    def _observation(self, request, ticket, state, supplier, workload=None):
         def update(row):
             previous = row.get("observation")
             if previous and ticket <= row.get("observation_applied_poll", 0): return row
@@ -133,6 +164,11 @@ class SkyPilotBackend:
                 "tenant_id", "project_id", "account_id", "operation_id", "provider", "generation")}
             observation.update(resource_id=row["cluster_name"], state=effective_state, supplier_state=effective_supplier,
                                revision=previous["revision"] if previous else 1)
+            prior_workload = previous.get("workload") if previous else None
+            if prior_workload and prior_workload["state"] in {"succeeded", "failed", "canceled"}:
+                observation["workload"] = prior_workload
+            elif workload is not None and row["state"] == "ready": observation["workload"] = workload
+            elif "job_id" in row: observation["workload"] = {"job_id":str(row["job_id"]), "state":"unknown"}
             if previous and observation != previous: observation["revision"] += 1
             row.update(observation=BackendObservation.model_validate(observation).model_dump(), observation_applied_poll=ticket)
             return row

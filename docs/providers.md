@@ -22,7 +22,12 @@ allocated resource. `INIT`, an omitted cluster and a failed read are uncertain,
 not proof of teardown. Observations use durable poll ordering: a late response
 cannot replace newer evidence, and confirmed teardown dominates an in-flight
 health reply. Capacity health does not establish workload completion or a
-supplier invoice cutoff. `scripts/qualify-skypilot.py` checks the real SDK
+supplier invoice cutoff. The adapter now retains the exact job ID returned by
+launch and queries `job_status` for that ID. A separate `workload` observation
+reports queued/running/succeeded/failed/canceled/unknown. A missing ID or status
+never means success; a terminal result survives later health reads and teardown.
+The orchestrator must still release capacity when its desired job finishes.
+`scripts/qualify-skypilot.py` checks the real SDK
 signature and request model without starting its server or calling a provider.
 SkyPilot 0.14.0's request model takes the `FORCE` refresh mode, despite a stale
 `refresh=True` example in its SDK docstring.

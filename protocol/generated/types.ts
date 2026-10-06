@@ -114,6 +114,7 @@ export interface components {
             state: "provisioning" | "running" | "paused" | "lost" | "released" | "unknown";
             /** @enum {string} */
             supplier_state: "allocated" | "released" | "unknown";
+            workload?: components["schemas"]["BackendWorkloadStatus"];
         };
         /** @enum {string} */
         BackendProvider: "vast" | "runpod" | "theta" | "kubernetes" | "simulator";
@@ -135,6 +136,11 @@ export interface components {
             workload_trust: "owner" | "untrusted";
             max_hourly_price_microusd: components["schemas"]["PositiveInteger"];
             command: string[];
+        };
+        BackendWorkloadStatus: {
+            job_id: components["schemas"]["BackendIdentifier"];
+            /** @enum {string} */
+            state: "queued" | "running" | "succeeded" | "failed" | "canceled" | "unknown";
         };
         BurstPolicy: {
             /** @enum {string} */

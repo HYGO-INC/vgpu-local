@@ -61,6 +61,14 @@ model BackendObservation {
   revision: PositiveInteger;
   state: "provisioning" | "running" | "paused" | "lost" | "released" | "unknown";
   supplier_state: "allocated" | "released" | "unknown";
+  // Only an identified submitted workload can finish. Missing means unavailable,
+  // not success; cluster UP does not prove that its command is still running.
+  workload?: BackendWorkloadStatus;
+}
+
+model BackendWorkloadStatus {
+  job_id: BackendIdentifier;
+  state: "queued" | "running" | "succeeded" | "failed" | "canceled" | "unknown";
 }
 
 model BurstPolicy {

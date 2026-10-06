@@ -1093,5 +1093,63 @@
         }
       ]
     }
+  },
+  {
+    "name": "identified-workload-finished",
+    "contract": "BackendWorkloadStatus",
+    "valid": true,
+    "document": {
+      "job_id": "17",
+      "state": "succeeded"
+    }
+  },
+  {
+    "name": "missing-workload-state",
+    "contract": "BackendWorkloadStatus",
+    "valid": false,
+    "path": "/state",
+    "document": {
+      "job_id": "17"
+    }
+  },
+  {
+    "name": "finished-work-is-still-allocated",
+    "contract": "BackendObservation",
+    "valid": true,
+    "document": {
+      "tenant_id": "tenant-a",
+      "project_id": "project-a",
+      "account_id": "account-a",
+      "operation_id": "operation-a",
+      "provider": "simulator",
+      "resource_id": "sim-123",
+      "generation": 1,
+      "revision": 2,
+      "state": "running",
+      "supplier_state": "allocated",
+      "workload": {
+        "job_id": "17",
+        "state": "failed"
+      }
+    }
+  },
+  {
+    "name": "workload-not-null",
+    "contract": "BackendObservation",
+    "valid": false,
+    "path": "/workload",
+    "document": {
+      "tenant_id": "tenant-a",
+      "project_id": "project-a",
+      "account_id": "account-a",
+      "operation_id": "operation-a",
+      "provider": "simulator",
+      "resource_id": "sim-123",
+      "generation": 1,
+      "revision": 2,
+      "state": "running",
+      "supplier_state": "allocated",
+      "workload": null
+    }
   }
 ]

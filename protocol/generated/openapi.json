@@ -801,6 +801,9 @@
               "released",
               "unknown"
             ]
+          },
+          "workload": {
+            "$ref": "#/components/schemas/BackendWorkloadStatus"
           }
         },
         "unevaluatedProperties": {
@@ -893,6 +896,32 @@
               "type": "string"
             },
             "minItems": 1
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "BackendWorkloadStatus": {
+        "type": "object",
+        "required": [
+          "job_id",
+          "state"
+        ],
+        "properties": {
+          "job_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "canceled",
+              "unknown"
+            ]
           }
         },
         "unevaluatedProperties": {

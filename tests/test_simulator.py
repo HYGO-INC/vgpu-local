@@ -8,6 +8,21 @@ from vgpu_local.journal import Journal
 from vgpu_local.simulator import Faults, Simulator, merge_observation
 
 
+@pytest.mark.parametrize("state", ["succeeded","failed","canceled"])
+def test_finished_work_does_not_release_capacity_or_change_its_result(tmp_path,backend_request,state):
+    simulator = Simulator(Journal(tmp_path/"work.db"))
+    original = simulator.provision(backend_request)
+    simulator.finish_workload(backend_request,state)
+    finished = simulator.observe(backend_request)
+    assert finished.revision == original.revision+1
+    assert finished.workload.state == state
+    assert finished.state == "running" and finished.supplier_state == "allocated"
+    simulator.finish_workload(backend_request,state)
+    assert simulator.observe(backend_request) == finished
+    with pytest.raises(ValueError): simulator.finish_workload(backend_request,"failed" if state == "succeeded" else "succeeded")
+    assert simulator.release(backend_request).workload == finished.workload
+
+
 def test_lost_reply_recovers_original_after_restart(tmp_path, backend_request):
     path = tmp_path / "state.db"
     first = Simulator(Journal(path), Faults(lose_create_reply=True))

@@ -10,11 +10,71 @@ from vgpu_local.journal import Journal
 from vgpu_local.skypilot_backend import SkyPilotBackend, task_config
 
 
+def workload_backend(tmp_path, request_data):
+    request = BackendRequest.model_validate({**request_data,"provider":"vast"})
+    sdk = MagicMock()
+    sdk.launch.return_value, sdk.down.return_value = "create", "delete"
+    sdk.status.return_value, sdk.job_status.return_value = "cluster", "job"
+    current = {"state":"RUNNING"}
+    backend = SkyPilotBackend(Journal(tmp_path/"jobs.db"),sdk)
+    def result(ticket):
+        if ticket == "create": return 17, object()
+        if ticket == "cluster": return [{"name":backend._owned(request)["cluster_name"],"status":"UP"}]
+        if ticket == "job": return {17:current["state"]}
+        if ticket == "delete": return None
+        raise AssertionError(ticket)
+    sdk.get.side_effect = result
+    backend.provision(request)
+    return request,sdk,current,backend
+
+
+@pytest.mark.parametrize("status,normalized", [("SUCCEEDED","succeeded"),("FAILED","failed"),("CANCELLED","canceled"),("FAILED_DRIVER","failed"),("FAILED_SETUP","failed")])
+def test_identified_job_completion_never_means_supplier_release(tmp_path,request_data,status,normalized):
+    request,sdk,current,backend = workload_backend(tmp_path,request_data)
+    running = backend.observe(request)
+    assert running.workload.model_dump() == {"job_id":"17","state":"running"}
+    sdk.job_status.assert_called_with(backend._owned(request)["cluster_name"],job_ids=[17])
+    current["state"] = status
+    completed = backend.observe(request)
+    assert completed.workload.state == normalized
+    assert completed.supplier_state == "allocated" and completed.state == "running"
+    assert completed.revision > running.revision
+    current["state"] = "RUNNING"  # a late or lost status cannot resurrect finished work
+    assert backend.observe(request).workload == completed.workload
+    backend.release(request)
+    released = backend.observe(request)
+    assert released.state == released.supplier_state == "released"
+    assert released.workload == completed.workload
+
+
+def test_absent_or_foreign_job_result_cannot_finish_a_workload(tmp_path,request_data):
+    request,sdk,current,backend = workload_backend(tmp_path,request_data)
+    current["state"] = None
+    assert backend.observe(request).workload.state == "unknown"
+    original = sdk.get.side_effect
+    sdk.get.side_effect = lambda ticket: {18:"SUCCEEDED"} if ticket == "job" else original(ticket)
+    with pytest.raises(OutcomeUnknown): backend.observe(request)
+    assert backend._owned(request)["observation"]["workload"]["state"] == "unknown"
+    sdk.down.assert_not_called()
+
+
+@pytest.mark.parametrize("result", [None,{},(True,None),(0,None),("17",None),(17,)])
+def test_malformed_launch_result_stays_uncertain(tmp_path,request_data,result):
+    request = BackendRequest.model_validate({**request_data,"provider":"vast"})
+    sdk = MagicMock(); sdk.launch.return_value = "create"; sdk.get.return_value = result
+    backend = SkyPilotBackend(Journal(tmp_path/"malformed.db"),sdk)
+    with pytest.raises(OutcomeUnknown): backend.provision(request)
+    with pytest.raises(OutcomeUnknown): backend.provision(request)
+    assert backend._owned(request)["state"] == "uncertain"
+    assert sdk.launch.call_count == 1
+
+
 @pytest.mark.parametrize("provider", ["vast", "runpod"])
 def test_provider_and_create_boundaries(tmp_path, request_data, provider):
     request = BackendRequest.model_validate({**request_data, "provider": provider, "capacity_mode": "spot",
                                            "command": ["python", "-c", "print('a b')"]})
     sdk = MagicMock()
+    sdk.get.return_value = (None, None)
     sdk.launch.return_value = "request-create"
     sdk.down.return_value = "request-delete"
     backend = SkyPilotBackend(Journal(tmp_path / "ops.db"), sdk)
@@ -37,6 +97,7 @@ def test_provider_and_create_boundaries(tmp_path, request_data, provider):
 def test_uncertain_launch_never_blindly_retries(tmp_path, request_data):
     request = BackendRequest.model_validate({**request_data, "provider": "runpod"})
     sdk = MagicMock()
+    sdk.get.return_value = (None, None)
     sdk.launch.return_value = "accepted-id"
     sdk.get.side_effect = TimeoutError()
     path = tmp_path / "ops.db"
@@ -54,6 +115,7 @@ def test_uncertain_launch_never_blindly_retries(tmp_path, request_data):
 def test_lost_sdk_submission_reply_requires_inventory(tmp_path, request_data):
     request = BackendRequest.model_validate({**request_data, "provider": "vast"})
     sdk = MagicMock()
+    sdk.get.return_value = (None, None)
     sdk.launch.side_effect = TimeoutError()
     backend = SkyPilotBackend(Journal(tmp_path / "ops.db"), sdk)
     with pytest.raises(OutcomeUnknown):
@@ -66,6 +128,7 @@ def test_lost_sdk_submission_reply_requires_inventory(tmp_path, request_data):
 def test_unknown_cleanup_is_not_reported_released(tmp_path, request_data):
     request = BackendRequest.model_validate({**request_data, "provider": "vast"})
     sdk = MagicMock()
+    sdk.get.return_value = (None, None)
     sdk.launch.return_value = "create"
     sdk.down.return_value = "delete"
     backend = SkyPilotBackend(Journal(tmp_path / "ops.db"), sdk)
@@ -90,6 +153,7 @@ def test_unqualified_execution_rejected(request_data, override):
 def test_concurrent_release_has_one_owner(tmp_path, request_data):
     request = BackendRequest.model_validate({**request_data, "provider": "vast"})
     sdk = MagicMock()
+    sdk.get.return_value = (None, None)
     sdk.launch.return_value = "create"
     sdk.down.return_value = "delete"
     backend = SkyPilotBackend(Journal(tmp_path / "ops.db"), sdk)
@@ -115,6 +179,7 @@ def test_concurrent_release_has_one_owner(tmp_path, request_data):
 def ready_backend(tmp_path, request_data):
     request = BackendRequest.model_validate({**request_data, "provider": "vast"})
     sdk = MagicMock()
+    sdk.get.return_value = (None, None)
     sdk.launch.return_value = "create"
     sdk.down.return_value = "delete"
     sdk.status.return_value = "status"
@@ -194,6 +259,7 @@ def test_confirmed_teardown_dominates_an_inflight_status_reply(tmp_path, request
 def test_account_worker_binding_rejects_other_accounts_before_any_provider_call(tmp_path, request_data):
     request = BackendRequest.model_validate({**request_data, "provider": "runpod"})
     sdk = MagicMock()
+    sdk.get.return_value = (None, None)
     backend = SkyPilotBackend(Journal(tmp_path / "ops.db"), sdk, account_id="another-account")
     with pytest.raises(UnsupportedCapability): backend.provision(request)
     with pytest.raises(UnsupportedCapability): backend.observe(request)

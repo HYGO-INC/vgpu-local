@@ -6,9 +6,18 @@ from __future__ import annotations
 from typing import Annotated, Literal
 
 from pydantic import ConfigDict, Field
+from pydantic.experimental.missing_sentinel import MISSING
 from vgpu_local.contracts.base import ContractModel
 
 type BackendIdentifier = Annotated[str, Field(..., max_length=255, min_length=1)]
+
+
+class BackendWorkloadStatus(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    job_id: str = Field(..., max_length=255, min_length=1)
+    state: Literal['queued', 'running', 'succeeded', 'failed', 'canceled', 'unknown']
 
 
 type NonnegativeInteger = Annotated[int, Field(..., ge=0, le=9007199254740991)]
@@ -57,6 +66,7 @@ class BackendObservation(ContractModel):
     revision: int = Field(..., ge=1, le=9007199254740991)
     state: Literal['provisioning', 'running', 'paused', 'lost', 'released', 'unknown']
     supplier_state: Literal['allocated', 'released', 'unknown']
+    workload: BackendWorkloadStatus | MISSING = MISSING
 
 
 class BackendRequest(ContractModel):
