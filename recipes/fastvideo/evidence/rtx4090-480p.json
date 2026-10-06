@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "started_at": "20261006T232146.069729Z",
+  "lock": {
+    "schema_version": 1,
+    "image": "ghcr.io/hao-ai-lab/fastvideo/fastvideo-dev@sha256:b30fbb7013f965b52cbacc3a2316a4d8503d5fad3522bc5396ac627d1eea80b3",
+    "image_source_revision": "8b51380466a963692a8c0afa254417bfcc2ba8bc",
+    "model": "FastVideo/FastWan2.1-T2V-1.3B-Diffusers",
+    "model_revision": "25e7ed7f41fd8ce2fdd108688c65e8caf0ce3aef",
+    "attention_backend": "VIDEO_SPARSE_ATTN",
+    "sparsity": 0.8,
+    "text_encoder_cpu_offload": true,
+    "text_encoder_precision": "bf16",
+    "execution_backend": "ray",
+    "container_memory_gib": 20,
+    "prompt": "A small red wooden boat moves slowly across a calm mountain lake at sunrise. Gentle ripples spread across the water. Wide shot, stable camera, natural light.",
+    "seed": 20261006,
+    "profiles": {
+      "smoke": {
+        "height": 256,
+        "width": 448,
+        "num_frames": 17,
+        "fps": 16
+      },
+      "480p": {
+        "height": 480,
+        "width": 832,
+        "num_frames": 81,
+        "fps": 16
+      }
+    }
+  },
+  "profile": "480p",
+  "baseline_gpu": {
+    "name": "NVIDIA GeForce RTX 4090",
+    "driver": "610.62",
+    "total_mib": 24564,
+    "used_mib": 2007,
+    "utilization_percent": 19
+  },
+  "measurements": [
+    {
+      "run": 1,
+      "seconds": 27.155231502023526,
+      "includes_first_use_costs": true
+    },
+    {
+      "run": 2,
+      "seconds": 17.119908908964135,
+      "includes_first_use_costs": false
+    }
+  ],
+  "memory_measurement": "whole GPU board; includes other host processes",
+  "load_seconds": 247.66179752501193,
+  "sampling": {
+    "height": 480,
+    "width": 832,
+    "num_frames": 81,
+    "fps": 16,
+    "num_inference_steps": 3,
+    "guidance_scale": 3.0,
+    "seed": 20261006
+  },
+  "videos": [
+    {
+      "file": "run-1/A small red wooden boat moves slowly across a calm mountain lake at sunrise. Gentle ripples spread a.mp4",
+      "frames": 81,
+      "width": 832,
+      "height": 480,
+      "fps": 16.0
+    },
+    {
+      "file": "run-2/A small red wooden boat moves slowly across a calm mountain lake at sunrise. Gentle ripples spread a.mp4",
+      "frames": 81,
+      "width": 832,
+      "height": 480,
+      "fps": 16.0
+    }
+  ],
+  "gpu_board_peak_mib": 18846,
+  "container_memory_peak_bytes_including_cache": 21083688960,
+  "container_memory_limit_bytes": 21474836480,
+  "container_memory_events": {
+    "low": "0",
+    "high": "0",
+    "max": "0",
+    "oom": "0",
+    "oom_kill": "0",
+    "oom_group_kill": "0"
+  }
+}

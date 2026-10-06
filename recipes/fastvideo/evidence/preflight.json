@@ -1,0 +1,22 @@
+{
+  "image": "ghcr.io/hao-ai-lab/fastvideo/fastvideo-dev@sha256:b30fbb7013f965b52cbacc3a2316a4d8503d5fad3522bc5396ac627d1eea80b3",
+  "image_source_revision": "8b51380466a963692a8c0afa254417bfcc2ba8bc",
+  "torch": "2.12.0+cu126",
+  "cuda": "12.6",
+  "fastvideo": "0.2.1",
+  "kernel": "0.3.5",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 4090",
+    "driver": "610.62",
+    "total_mib": 24564,
+    "used_mib": 2000,
+    "utilization_percent": 8
+  },
+  "capability": [
+    8,
+    9
+  ],
+  "cuda_reduction": "passed",
+  "ray": "2.59.0",
+  "cuda_tensor_round_trip": "passed"
+}

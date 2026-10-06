@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "image": "ghcr.io/hao-ai-lab/fastvideo/fastvideo-dev@sha256:b30fbb7013f965b52cbacc3a2316a4d8503d5fad3522bc5396ac627d1eea80b3",
+  "image_source_revision": "8b51380466a963692a8c0afa254417bfcc2ba8bc",
+  "model": "FastVideo/FastWan2.1-T2V-1.3B-Diffusers",
+  "model_revision": "25e7ed7f41fd8ce2fdd108688c65e8caf0ce3aef",
+  "attention_backend": "VIDEO_SPARSE_ATTN",
+  "sparsity": 0.8,
+  "text_encoder_cpu_offload": true,
+  "text_encoder_precision": "bf16",
+  "execution_backend": "ray",
+  "container_memory_gib": 20,
+  "prompt": "A small red wooden boat moves slowly across a calm mountain lake at sunrise. Gentle ripples spread across the water. Wide shot, stable camera, natural light.",
+  "seed": 20261006,
+  "profiles": {
+    "smoke": { "height": 256, "width": 448, "num_frames": 17, "fps": 16 },
+    "480p": { "height": 480, "width": 832, "num_frames": 81, "fps": 16 }
+  }
+}

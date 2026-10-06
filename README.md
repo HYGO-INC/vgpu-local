@@ -67,6 +67,11 @@ multi-GPU video recipes remain planned. See the [support matrix and engine choic
 
 ## Providers and overflow
 
+The [pinned FastVideo recipe](recipes/fastvideo/README.md) has passed a small
+single-4090 video qualification, with cold-load time, warm generation time and
+memory measured separately. It is independent of the cloud adapters and does not
+claim long-video or multi-GPU qualification.
+
 The Python library includes Vast/Runpod adapters through SkyPilot and a Theta
 GPU Node API v1 client. These are tested with injected SDK/HTTP transports;
 live supplier qualification is still pending. See [provider boundaries](docs/providers.md).
