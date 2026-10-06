@@ -14,13 +14,17 @@ account or Internet connection.
 - Reusable Vast/Runpod SkyPilot adapters, a Theta GPU Node HTTP client and a
   persistent offline simulator. Live provider qualification remains outstanding.
 - Conservative overflow eligibility checks. Cloud execution itself remains off.
+- [Outbound connection enrollment](cloud-connection.md), with retry-stable site
+  credentials in the OS credential store. Enrollment enables neither spending nor
+  contribution. Client failure behavior is tested offline; production deployment
+  and the browser/device login flow remain outstanding.
 
 ## Work still required
 
 - Site enrollment and durable authentication, controller reconciliation, local
   console, upgrades/restore and hardware-qualified installation profiles.
-- Public federation HTTP endpoints, scoped client credentials and a protocol
-  compatibility handshake. No endpoint in this repository is claimed to be live.
+- Hosted deployment of the federation HTTP endpoints and credential renewal.
+  The connection handshake uses `vgpu.site.v1`; it is not a live service claim.
 - Atomic budget reservations in the cloud; quotes, maximum runtime, cleanup and
   reconciliation of continuing remote costs during site disconnection.
 - A persisted handoff: fence the local submission against admission, stop/drain

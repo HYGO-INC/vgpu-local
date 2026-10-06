@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 from pathlib import Path
 import subprocess
 
@@ -15,6 +16,16 @@ def main():
     inventory.add_argument("--context", help="Explicit Kubernetes context for live inventory")
     profile = commands.add_parser("capabilities")
     profile.add_argument("provider", choices=["vast", "runpod", "theta", "kubernetes", "simulator"])
+    cloud = commands.add_parser("cloud", help="Explicit cloud connection; does not enable spending or contribution")
+    cloud_commands = cloud.add_subparsers(dest="cloud_action", required=True)
+    for name in ("connect", "status", "disconnect"):
+        connection = cloud_commands.add_parser(name)
+        connection.add_argument("--config", type=Path, default=Path.home() / ".config/vgpu-local/cloud.json")
+        if name == "connect":
+            connection.add_argument("--endpoint", required=True)
+            connection.add_argument("--tenant", required=True)
+            connection.add_argument("--project", required=True)
+            connection.add_argument("--name", required=True)
     for name in ("render-job", "submit-job"):
         job = commands.add_parser(name, help="Create a suspended job admitted by your installed Kueue")
         job.add_argument("--name", required=True)
@@ -30,7 +41,17 @@ def main():
         job.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     try:
-        if args.action == "capabilities":
+        if args.action == "cloud":
+            from .cloud import CloudConnection, SystemKeyring
+            client = CloudConnection(args.config, SystemKeyring())
+            if args.cloud_action == "connect":
+                result = client.connect(endpoint=args.endpoint, tenant_id=args.tenant, project_id=args.project,
+                                        name=args.name, user_access_token=os.environ.get("VGPU_USER_ACCESS_TOKEN", ""))
+            elif args.cloud_action == "status":
+                result = client.status()
+            else:
+                result = client.disconnect()
+        elif args.action == "capabilities":
             result = capabilities(args.provider).model_dump()
         elif args.action == "inventory":
             if args.nodes_json:
@@ -56,5 +77,5 @@ def main():
                                 input=json.dumps(result), text=True, check=True, timeout=30)
                 return
         print(json.dumps(result, indent=2))
-    except (ValueError, OSError, subprocess.SubprocessError) as error:
+    except (ValueError, OSError, subprocess.SubprocessError, RuntimeError) as error:
         parser.exit(2, str(error) + "\n")

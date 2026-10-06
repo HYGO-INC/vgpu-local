@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
 
 
 class ContractModel(BaseModel):
-    model_config = ConfigDict(strict=True, extra="forbid", frozen=True)
+    model_config = ConfigDict(strict=True, extra="forbid", frozen=True, regex_engine="python-re")
 
     @field_validator("*", mode="before")
     @classmethod

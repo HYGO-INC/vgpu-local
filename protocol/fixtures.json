@@ -1,11 +1,245 @@
 [
-  {"name":"source-reviewed-runpod","contract":"BackendCapabilities","valid":true,"document":{"provider":"runpod","engine":"skypilot","allocation_modes":["whole_device"],"supports_multi_node":false,"supports_stop":false,"supports_spot":true,"guaranteed_notice_seconds":0,"create_idempotency":"reconcile_before_retry","workload_isolation":"owner_only","evidence":"source_reviewed"}},
-  {"name":"capability-not-coerced","contract":"BackendCapabilities","valid":false,"path":"/supports_stop","document":{"provider":"runpod","engine":"skypilot","allocation_modes":["whole_device"],"supports_multi_node":false,"supports_stop":"false","supports_spot":true,"guaranteed_notice_seconds":0,"create_idempotency":"reconcile_before_retry","workload_isolation":"owner_only","evidence":"source_reviewed"}},
-  {"name":"provider-request","contract":"BackendRequest","valid":true,"document":{"tenant_id":"tenant-a","project_id":"project-a","account_id":"account-a","operation_id":"operation-a","generation":1,"provider":"vast","image":"example/workload:1","gpu_model":"RTX4090","gpu_count":1,"num_nodes":1,"region":"region-a","capacity_mode":"on_demand","workload_trust":"owner","max_hourly_price_microusd":500000,"command":["python","train.py"]}},
-  {"name":"gpu-count-not-boolean","contract":"BackendRequest","valid":false,"path":"/gpu_count","document":{"tenant_id":"tenant-a","project_id":"project-a","account_id":"account-a","operation_id":"operation-a","generation":1,"provider":"vast","image":"example/workload:1","gpu_model":"RTX4090","gpu_count":true,"num_nodes":1,"region":"region-a","capacity_mode":"on_demand","workload_trust":"owner","max_hourly_price_microusd":500000,"command":["python","train.py"]}},
-  {"name":"scoped-observation","contract":"BackendObservation","valid":true,"document":{"tenant_id":"tenant-a","project_id":"project-a","account_id":"account-a","operation_id":"operation-a","provider":"simulator","resource_id":"sim-123","generation":1,"revision":2,"state":"running","supplier_state":"allocated"}},
-  {"name":"observation-needs-account","contract":"BackendObservation","valid":false,"path":"/account_id","document":{"tenant_id":"tenant-a","project_id":"project-a","operation_id":"operation-a","provider":"simulator","resource_id":"sim-123","generation":1,"revision":2,"state":"running","supplier_state":"allocated"}},
-  {"name":"cloud-off-with-zero-budget","contract":"BurstPolicy","valid":true,"document":{"mode":"disabled","allowed_providers":[],"allowed_regions":[],"max_hourly_price_microusd":0,"max_total_spend_microusd":0,"max_concurrent_remote_jobs":0,"local_wait_seconds":0,"data_policy":"local_only"}},
-  {"name":"cloud-policy-no-null","contract":"BurstPolicy","valid":false,"path":"/allowed_regions","document":{"mode":"disabled","allowed_providers":[],"allowed_regions":null,"max_hourly_price_microusd":0,"max_total_spend_microusd":0,"max_concurrent_remote_jobs":0,"local_wait_seconds":0,"data_policy":"local_only"}},
-  {"name":"region-value-not-coerced","contract":"BurstPolicy","valid":false,"path":"/allowed_regions/0","document":{"mode":"automatic","allowed_providers":["vast"],"allowed_regions":[42],"max_hourly_price_microusd":500000,"max_total_spend_microusd":10000000,"max_concurrent_remote_jobs":1,"local_wait_seconds":60,"data_policy":"artifacts_only"}}
+  {
+    "name": "source-reviewed-runpod",
+    "contract": "BackendCapabilities",
+    "valid": true,
+    "document": {
+      "provider": "runpod",
+      "engine": "skypilot",
+      "allocation_modes": [
+        "whole_device"
+      ],
+      "supports_multi_node": false,
+      "supports_stop": false,
+      "supports_spot": true,
+      "guaranteed_notice_seconds": 0,
+      "create_idempotency": "reconcile_before_retry",
+      "workload_isolation": "owner_only",
+      "evidence": "source_reviewed"
+    }
+  },
+  {
+    "name": "capability-not-coerced",
+    "contract": "BackendCapabilities",
+    "valid": false,
+    "path": "/supports_stop",
+    "document": {
+      "provider": "runpod",
+      "engine": "skypilot",
+      "allocation_modes": [
+        "whole_device"
+      ],
+      "supports_multi_node": false,
+      "supports_stop": "false",
+      "supports_spot": true,
+      "guaranteed_notice_seconds": 0,
+      "create_idempotency": "reconcile_before_retry",
+      "workload_isolation": "owner_only",
+      "evidence": "source_reviewed"
+    }
+  },
+  {
+    "name": "provider-request",
+    "contract": "BackendRequest",
+    "valid": true,
+    "document": {
+      "tenant_id": "tenant-a",
+      "project_id": "project-a",
+      "account_id": "account-a",
+      "operation_id": "operation-a",
+      "generation": 1,
+      "provider": "vast",
+      "image": "example/workload:1",
+      "gpu_model": "RTX4090",
+      "gpu_count": 1,
+      "num_nodes": 1,
+      "region": "region-a",
+      "capacity_mode": "on_demand",
+      "workload_trust": "owner",
+      "max_hourly_price_microusd": 500000,
+      "command": [
+        "python",
+        "train.py"
+      ]
+    }
+  },
+  {
+    "name": "gpu-count-not-boolean",
+    "contract": "BackendRequest",
+    "valid": false,
+    "path": "/gpu_count",
+    "document": {
+      "tenant_id": "tenant-a",
+      "project_id": "project-a",
+      "account_id": "account-a",
+      "operation_id": "operation-a",
+      "generation": 1,
+      "provider": "vast",
+      "image": "example/workload:1",
+      "gpu_model": "RTX4090",
+      "gpu_count": true,
+      "num_nodes": 1,
+      "region": "region-a",
+      "capacity_mode": "on_demand",
+      "workload_trust": "owner",
+      "max_hourly_price_microusd": 500000,
+      "command": [
+        "python",
+        "train.py"
+      ]
+    }
+  },
+  {
+    "name": "scoped-observation",
+    "contract": "BackendObservation",
+    "valid": true,
+    "document": {
+      "tenant_id": "tenant-a",
+      "project_id": "project-a",
+      "account_id": "account-a",
+      "operation_id": "operation-a",
+      "provider": "simulator",
+      "resource_id": "sim-123",
+      "generation": 1,
+      "revision": 2,
+      "state": "running",
+      "supplier_state": "allocated"
+    }
+  },
+  {
+    "name": "observation-needs-account",
+    "contract": "BackendObservation",
+    "valid": false,
+    "path": "/account_id",
+    "document": {
+      "tenant_id": "tenant-a",
+      "project_id": "project-a",
+      "operation_id": "operation-a",
+      "provider": "simulator",
+      "resource_id": "sim-123",
+      "generation": 1,
+      "revision": 2,
+      "state": "running",
+      "supplier_state": "allocated"
+    }
+  },
+  {
+    "name": "cloud-off-with-zero-budget",
+    "contract": "BurstPolicy",
+    "valid": true,
+    "document": {
+      "mode": "disabled",
+      "allowed_providers": [],
+      "allowed_regions": [],
+      "max_hourly_price_microusd": 0,
+      "max_total_spend_microusd": 0,
+      "max_concurrent_remote_jobs": 0,
+      "local_wait_seconds": 0,
+      "data_policy": "local_only"
+    }
+  },
+  {
+    "name": "cloud-policy-no-null",
+    "contract": "BurstPolicy",
+    "valid": false,
+    "path": "/allowed_regions",
+    "document": {
+      "mode": "disabled",
+      "allowed_providers": [],
+      "allowed_regions": null,
+      "max_hourly_price_microusd": 0,
+      "max_total_spend_microusd": 0,
+      "max_concurrent_remote_jobs": 0,
+      "local_wait_seconds": 0,
+      "data_policy": "local_only"
+    }
+  },
+  {
+    "name": "region-value-not-coerced",
+    "contract": "BurstPolicy",
+    "valid": false,
+    "path": "/allowed_regions/0",
+    "document": {
+      "mode": "automatic",
+      "allowed_providers": [
+        "vast"
+      ],
+      "allowed_regions": [
+        42
+      ],
+      "max_hourly_price_microusd": 500000,
+      "max_total_spend_microusd": 10000000,
+      "max_concurrent_remote_jobs": 1,
+      "local_wait_seconds": 60,
+      "data_policy": "artifacts_only"
+    }
+  },
+  {
+    "name": "site enrollment valid",
+    "contract": "SiteEnrollment",
+    "valid": true,
+    "document": {
+      "site_id": "sit_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "Office",
+      "protocol_version": "vgpu.site.v1",
+      "credential": "vgs_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  },
+  {
+    "name": "site enrollment rejects noncanonical credential",
+    "contract": "SiteEnrollment",
+    "valid": false,
+    "path": "/credential",
+    "document": {
+      "site_id": "sit_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "Office",
+      "protocol_version": "vgpu.site.v1",
+      "credential": "vgs_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB"
+    }
+  },
+  {
+    "name": "site enrollment rejects unknown version",
+    "contract": "SiteEnrollment",
+    "valid": false,
+    "path": "/protocol_version",
+    "document": {
+      "site_id": "sit_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "Office",
+      "protocol_version": "vgpu.site.v2",
+      "credential": "vgs_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  },
+  {
+    "name": "site connection valid",
+    "contract": "SiteConnection",
+    "valid": true,
+    "document": {
+      "site_id": "sit_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "name": "Office",
+      "protocol_version": "vgpu.site.v1",
+      "state": "active",
+      "credential_expires_at": 1800000000,
+      "consumption_enabled": false,
+      "contribution_enabled": false
+    }
+  },
+  {
+    "name": "site connection cannot enable contribution",
+    "contract": "SiteConnection",
+    "valid": false,
+    "path": "/contribution_enabled",
+    "document": {
+      "site_id": "sit_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "name": "Office",
+      "protocol_version": "vgpu.site.v1",
+      "state": "active",
+      "credential_expires_at": 1800000000,
+      "consumption_enabled": false,
+      "contribution_enabled": true
+    }
+  }
 ]

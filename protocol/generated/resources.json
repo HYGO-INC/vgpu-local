@@ -421,6 +421,115 @@
             "unevaluatedProperties": {
                 "not": {}
             }
+        },
+        "SiteEnrollment": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SiteEnrollment.json",
+            "type": "object",
+            "properties": {
+                "site_id": {
+                    "$ref": "SiteId.json"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                },
+                "protocol_version": {
+                    "type": "string",
+                    "const": "vgpu.site.v1"
+                },
+                "credential": {
+                    "$ref": "SiteCredential.json"
+                }
+            },
+            "required": [
+                "site_id",
+                "name",
+                "protocol_version",
+                "credential"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "SiteId": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SiteId.json",
+            "type": "string",
+            "pattern": "^sit_[a-f0-9]{32}(?![\\s\\S])"
+        },
+        "SiteCredential": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SiteCredential.json",
+            "type": "string",
+            "pattern": "^vgs_[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048](?![\\s\\S])"
+        },
+        "SiteConnection": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SiteConnection.json",
+            "type": "object",
+            "properties": {
+                "site_id": {
+                    "$ref": "SiteId.json"
+                },
+                "tenant_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "project_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                },
+                "protocol_version": {
+                    "type": "string",
+                    "const": "vgpu.site.v1"
+                },
+                "state": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "active"
+                        },
+                        {
+                            "type": "string",
+                            "const": "expired"
+                        },
+                        {
+                            "type": "string",
+                            "const": "revoked"
+                        }
+                    ]
+                },
+                "credential_expires_at": {
+                    "$ref": "NonnegativeInteger.json"
+                },
+                "consumption_enabled": {
+                    "type": "boolean",
+                    "const": false
+                },
+                "contribution_enabled": {
+                    "type": "boolean",
+                    "const": false
+                }
+            },
+            "required": [
+                "site_id",
+                "tenant_id",
+                "project_id",
+                "name",
+                "protocol_version",
+                "state",
+                "credential_expires_at",
+                "consumption_enabled",
+                "contribution_enabled"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
         }
     }
 }

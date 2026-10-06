@@ -314,6 +314,107 @@
         "format": "int64",
         "minimum": 1,
         "maximum": 9007199254740991
+      },
+      "SiteConnection": {
+        "type": "object",
+        "required": [
+          "site_id",
+          "tenant_id",
+          "project_id",
+          "name",
+          "protocol_version",
+          "state",
+          "credential_expires_at",
+          "consumption_enabled",
+          "contribution_enabled"
+        ],
+        "properties": {
+          "site_id": {
+            "$ref": "#/components/schemas/SiteId"
+          },
+          "tenant_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "project_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "protocol_version": {
+            "type": "string",
+            "enum": [
+              "vgpu.site.v1"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "expired",
+              "revoked"
+            ]
+          },
+          "credential_expires_at": {
+            "$ref": "#/components/schemas/NonnegativeInteger"
+          },
+          "consumption_enabled": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          },
+          "contribution_enabled": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "SiteCredential": {
+        "type": "string",
+        "pattern": "^vgs_[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048](?![\\s\\S])"
+      },
+      "SiteEnrollment": {
+        "type": "object",
+        "required": [
+          "site_id",
+          "name",
+          "protocol_version",
+          "credential"
+        ],
+        "properties": {
+          "site_id": {
+            "$ref": "#/components/schemas/SiteId"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "protocol_version": {
+            "type": "string",
+            "enum": [
+              "vgpu.site.v1"
+            ]
+          },
+          "credential": {
+            "$ref": "#/components/schemas/SiteCredential"
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "SiteId": {
+        "type": "string",
+        "pattern": "^sit_[a-f0-9]{32}(?![\\s\\S])"
       }
     }
   }

@@ -14,7 +14,7 @@ Use upstream Kubernetes/Kueue and existing engines; do not build another generic
 GPU scheduler. State exactly which behavior is implemented and hardware-tested.
 Never imply that pooling devices transparently combines their VRAM.
 
-Edit public contracts in `protocol/backend.tsp`; use `pnpm generate` and
+Edit public contracts in `protocol/backend.tsp` and `protocol/federation.tsp`; use `pnpm generate` and
 `pnpm check`. Coordinate pinned protocol imports with hosted consumers. No tests
 may provision paid resources or mutate a real cluster without explicit test setup.
 

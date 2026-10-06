@@ -71,6 +71,30 @@ export interface components {
         NonnegativeInteger: number;
         /** Format: int64 */
         PositiveInteger: number;
+        SiteConnection: {
+            site_id: components["schemas"]["SiteId"];
+            tenant_id: components["schemas"]["BackendIdentifier"];
+            project_id: components["schemas"]["BackendIdentifier"];
+            name: string;
+            /** @enum {string} */
+            protocol_version: "vgpu.site.v1";
+            /** @enum {string} */
+            state: "active" | "expired" | "revoked";
+            credential_expires_at: components["schemas"]["NonnegativeInteger"];
+            /** @enum {boolean} */
+            consumption_enabled: false;
+            /** @enum {boolean} */
+            contribution_enabled: false;
+        };
+        SiteCredential: string;
+        SiteEnrollment: {
+            site_id: components["schemas"]["SiteId"];
+            name: string;
+            /** @enum {string} */
+            protocol_version: "vgpu.site.v1";
+            credential: components["schemas"]["SiteCredential"];
+        };
+        SiteId: string;
     };
     responses: never;
     parameters: never;

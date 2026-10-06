@@ -78,3 +78,30 @@ class BurstPolicy(ContractModel):
     max_concurrent_remote_jobs: int = Field(..., ge=0, le=9007199254740991)
     local_wait_seconds: int = Field(..., ge=0, le=9007199254740991)
     data_policy: Literal['local_only', 'artifacts_only']
+
+
+class SiteConnection(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    site_id: str = Field(..., pattern='^sit_[a-f0-9]{32}(?![\\s\\S])')
+    tenant_id: str = Field(..., max_length=255, min_length=1)
+    project_id: str = Field(..., max_length=255, min_length=1)
+    name: str = Field(..., max_length=120, min_length=1)
+    protocol_version: Literal['vgpu.site.v1']
+    state: Literal['active', 'expired', 'revoked']
+    credential_expires_at: int = Field(..., ge=0, le=9007199254740991)
+    consumption_enabled: Literal[False]
+    contribution_enabled: Literal[False]
+
+
+class SiteEnrollment(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    site_id: str = Field(..., pattern='^sit_[a-f0-9]{32}(?![\\s\\S])')
+    name: str = Field(..., max_length=120, min_length=1)
+    protocol_version: Literal['vgpu.site.v1']
+    credential: str = Field(
+        ..., pattern='^vgs_[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048](?![\\s\\S])'
+    )
