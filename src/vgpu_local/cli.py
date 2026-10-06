@@ -11,6 +11,8 @@ from .kubernetes import gpu_inventory, render_job
 def main():
     parser = argparse.ArgumentParser(description="Local GPU tools; no cloud account required")
     commands = parser.add_subparsers(dest="action", required=True)
+    from .interruption_cli import register
+    register(commands)
     inventory = commands.add_parser("inventory", help="Report allocatable GPUs; this is not free capacity")
     inventory.add_argument("--nodes-json", type=Path, help="Read a saved kubectl nodes response offline")
     inventory.add_argument("--context", help="Explicit Kubernetes context for live inventory")
@@ -41,7 +43,10 @@ def main():
         job.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     try:
-        if args.action == "cloud":
+        if args.action == "interruption":
+            from .interruption_cli import run
+            result = run(args)
+        elif args.action == "cloud":
             from .cloud import CloudConnection, SystemKeyring
             client = CloudConnection(args.config, SystemKeyring())
             if args.cloud_action == "connect":

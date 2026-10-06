@@ -1,0 +1,21 @@
+{
+  "source_id": "local-owner",
+  "source_event_id": "example-maintenance",
+  "source_revision": 1,
+  "authority": "local_owner",
+  "state": "active",
+  "kind": "preempt",
+  "reason": "maintenance",
+  "observed_at_ms": 1000,
+  "source_time_kind": "unknown",
+  "source_action_at_ms": null,
+  "source_not_before_ms": null,
+  "release_by_ms": null,
+  "signal_at_ms": null,
+  "safety_margin_ms": 0,
+  "clock_uncertainty_ms": 0,
+  "mapping_policy": "example.manual.v1",
+  "notice_class": "best_effort",
+  "allowed_actions": ["ack", "ready"],
+  "extension_limit_ms": null
+}

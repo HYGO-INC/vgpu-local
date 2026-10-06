@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "scope": {
+    "tenant_id": "local-owner",
+    "project_id": "local-project",
+    "lease_id": "example-lease",
+    "job_id": "example-job",
+    "attempt_id": "example-attempt",
+    "generation": 1,
+    "controller_epoch": 1,
+    "agent_session_id": "igs_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "journal": "controller.sqlite",
+  "participants": [
+    { "id": "coordinator", "mailbox": "coordinator" }
+  ]
+}

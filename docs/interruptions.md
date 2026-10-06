@@ -90,6 +90,45 @@ users run this transport in Linux/WSL; native Windows is explicitly refused.
 
 ## Qualification and remaining integration
 
+### Local command-line exchange
+
+The CLI now connects the durable controller and Linux mailboxes. Keep an operator
+configuration outside every workload mailbox. Copy `examples/interruption-relay.json`
+to a controller-owned directory, replace its example scope with this allocation's
+runtime identity, and assign distinct mailbox paths to all expected participants.
+Paths are relative to the configuration file. The SQLite journal is single-host
+operator state, never a workload mount or a shared network database.
+
+```sh
+# Operator: initialize and publish a first empty snapshot.
+vgpu-local interruption relay --config /var/lib/vgpu/runtime/relay.json --initialize --once
+# Configure OS ownership/groups for the workload's requests directory and read views.
+# Operator: persist a normalized notice supplied by the selected reclaim authority.
+vgpu-local interruption publish --config /var/lib/vgpu/runtime/relay.json --notice notice.json
+# Operator: supervised relay; use --once for a bounded reconciliation pass.
+vgpu-local interruption relay --config /var/lib/vgpu/runtime/relay.json
+
+# Workload: read a view using its separately provided runtime scope.
+vgpu-local interruption snapshot --mailbox /run/vgpu/interruptions --scope scope.json --participant coordinator
+# request.json is an InterruptionRequest with this notice/version and one persistent request ID.
+vgpu-local interruption submit --mailbox /run/vgpu/interruptions --request request.json --wait-seconds 5
+vgpu-local interruption receipt --mailbox /run/vgpu/interruptions --request request.json
+```
+
+The example notice has unknown timing; replace it with observed source data. It
+does not fabricate a future warning interval. `receipt_pending` means no correlated
+receipt arrived within the requested wait; it is not acceptance or rejection.
+Keep and retry the identical request after a lost response. Changed intent needs
+a new request ID and the current notice version.
+
+One file lock admits a publisher for each canonical journal path. Relays reject
+overlapping participant mailboxes, operator state inside them, another runtime's
+snapshot and a journal that has fallen behind already published state. Each
+participant has a bounded batch; a forged participant response remains unacknowledged.
+The relay never invokes a shell, sends a stop signal, grants extensions, confirms
+release or changes billing. Those remain the external reclaim controller's work.
+Do not mount the operator journal/configuration into workload containers.
+
 The controller tests cover cancellation/release races, duplicate/late updates,
 receipt replay, participant aggregation, scoped runtime rejection, multiple
 constraints, explicit extensions and confirmed release. Linux file tests exercise
@@ -97,7 +136,7 @@ real descriptor operations, symlink substitution, FIFOs, oversized files, stale
 snapshots and failure after a response commits. Ordinary offline checks do not
 provision GPUs or send stop signals.
 
-This component is not yet a deployed node agent. Runtime supervisor wiring,
+The local file relay is implemented; it is not yet a deployed node agent. Runtime supervisor wiring,
 provider notice watchers, authenticated local sockets/HTTP, hosted API/SSE and
 signed webhook delivery still need integration. Neither vendor metadata emulation
 nor universal unchanged-handler compatibility is claimed. Use named, separately

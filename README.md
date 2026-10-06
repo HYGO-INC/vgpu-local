@@ -85,7 +85,8 @@ See [architecture and remaining work](docs/architecture.md).
 
 The [interruption protocol](docs/interruptions.md) provides versioned warnings,
 acknowledgement/readiness receipts, cancellation, explicit extension grants and a
-Linux file channel. Reclamation and billing remain external authority boundaries.
+Linux file channel, with `vgpu-local interruption` commands for the operator relay
+and workload responses. Reclamation and billing remain external authority boundaries.
 
 ## Development
 
