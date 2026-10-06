@@ -13,6 +13,7 @@ claim the vgpu.com production API is deployed.
 ```text
 vgpu-local cloud connect --endpoint https://your-cloud-origin --tenant ten_example0 --project prj_example0 --name Office
 vgpu-local cloud status
+vgpu-local cloud renew
 vgpu-local cloud disconnect
 ```
 
@@ -22,13 +23,29 @@ macOS Keychain and Linux Secret Service. There is no plaintext fallback. If no
 supported store is available, connection fails; local GPU commands still work.
 `--config` selects a metadata file (default `~/.config/vgpu-local/cloud.json`). It
 contains only the origin, scope, site ID and name. Changing its origin/scope does
-not cause the existing credential to be sent elsewhere.
+not cause the existing credential to be sent elsewhere. Temporary renewal state
+also stays in the OS credential store, never this metadata file.
 
 If enrollment times out, retry the same command/config after refreshing the user
 session if needed. The same site ID and key are reused. Enrollment replay never
 extends credential validity. The server sets expiration; expired or revoked sites
-cannot authenticate status calls. Re-enrollment with a new configuration creates
-a new site and credential. Credential rotation/renewal is a separate future flow.
+cannot authenticate status calls. Use `cloud renew` before expiry to replace the
+site credential and renew its lifetime. An expired/revoked connection requires
+user-authorized enrollment with a new configuration. `connect` replays initial
+enrollment; use `status`/`renew` to manage an already renewed connection.
+
+Renewal saves the old credential, replacement and random retry identity together
+in one OS credential entry before the request. Retry `cloud renew` after response
+loss: it sends the same identity and key. The server accepts the old key only for
+that exact committed rotation while its replacement is current. Normal requests
+reject the old key immediately. A replay never extends the new expiry again.
+`cloud status` can independently confirm the replacement and recover local state.
+
+Commands share a hard OS file lock for the connection identity, including copied
+configs. Locks contain no credentials and release when the process dies. This uses
+the pinned upstream [filelock](https://py-filelock.readthedocs.io/en/latest/)
+package. Concurrent commands fail with a retryable busy message instead of
+overwriting each other's OS credential entry.
 
 Disconnect revokes only this connection and can be retried after a lost response.
 It does not stop local jobs or delete the config/key, so revocation remains safely

@@ -10,6 +10,14 @@ scalar SiteId extends string;
 @pattern("^vgs_[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048](?![\\s\\S])")
 scalar SiteCredential extends string;
 
+@pattern("^rot_[a-f0-9]{32}(?![\\s\\S])")
+scalar SiteRotationId extends string;
+
+model SiteCredentialRotation {
+  rotation_id: SiteRotationId;
+  credential: SiteCredential;
+}
+
 model SiteEnrollment {
   site_id: SiteId;
   @minLength(1) @maxLength(120)
@@ -32,6 +40,10 @@ model SiteConnection {
   contribution_enabled: false;
 }
 
+model SiteRotationResult extends SiteConnection {
+  rotation_id: SiteRotationId;
+}
+
 model ProtocolError {
   @pattern("^[a-z][a-z0-9_]{0,63}(?![\\s\\S])")
   error: string;
@@ -52,6 +64,12 @@ interface SiteFederation {
   // Connection calls accept only this installation's scoped credential.
   @get @route("/{site_id}/connection")
   connection(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier, @path site_id: SiteId): SiteConnection | FederationErrorResponse;
+
+  // Old credentials can replay only this exact rotation while its new key is current.
+  // A replay does not extend expiry; revoked/expired sites cannot rotate.
+  @post @route("/{site_id}/connection/renew")
+  renew(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier, @path site_id: SiteId,
+    @body rotation: SiteCredentialRotation): SiteRotationResult | FederationErrorResponse;
 
   @post @route("/{site_id}/connection/revoke")
   disconnect(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier, @path site_id: SiteId): SiteConnection | FederationErrorResponse;

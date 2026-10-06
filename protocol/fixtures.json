@@ -258,5 +258,34 @@
     "document": {
       "error": "provider credentials: value"
     }
+  },
+  {
+    "name": "site credential rotation valid",
+    "contract": "SiteCredentialRotation",
+    "valid": true,
+    "document": {
+      "rotation_id": "rot_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "credential": "vgs_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  },
+  {
+    "name": "site credential rotation rejects null credential",
+    "contract": "SiteCredentialRotation",
+    "valid": false,
+    "path": "/credential",
+    "document": {
+      "rotation_id": "rot_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "credential": null
+    }
+  },
+  {
+    "name": "site credential rotation rejects malformed identity",
+    "contract": "SiteCredentialRotation",
+    "valid": false,
+    "path": "/rotation_id",
+    "document": {
+      "rotation_id": "rot_too-short",
+      "credential": "vgs_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
   }
 ]

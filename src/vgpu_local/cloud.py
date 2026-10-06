@@ -2,6 +2,8 @@
 import json
 import os
 import secrets
+import re
+from contextlib import contextmanager
 from hashlib import sha256
 from pathlib import Path
 from typing import Protocol
@@ -9,8 +11,9 @@ from urllib.parse import urlsplit
 from uuid import uuid4
 
 import httpx
+from filelock import FileLock, Timeout
 
-from .contracts.models import SiteConnection, SiteEnrollment
+from .contracts.models import SiteConnection, SiteEnrollment, SiteCredentialRotation, SiteRotationResult
 
 
 class CloudError(RuntimeError):
@@ -58,10 +61,11 @@ def endpoint_url(value: str) -> str:
 
 
 class CloudConnection:
-    def __init__(self, config: Path, secrets_store: SecretStore, *, transport=None):
+    def __init__(self, config: Path, secrets_store: SecretStore, *, transport=None, lock_dir: Path | None = None):
         self.config = config
         self.secrets = secrets_store
         self.transport = transport
+        self.lock_dir = lock_dir or Path.home() / ".config/vgpu-local/locks"
 
     def connect(self, *, endpoint: str, tenant_id: str, project_id: str, name: str, user_access_token: str):
         import re
@@ -102,12 +106,61 @@ class CloudConnection:
 
     def status(self):
         settings = self._settings()
-        return self._request(settings, "GET", f'/sites/{settings["site_id"]}/connection', self._credential(settings))
+        with self._lock(settings):
+            return self._connection_request(settings, "GET", "")
 
     def disconnect(self):
         settings = self._settings()
         # Keep the credential and metadata for safe retry if the response is lost.
-        return self._request(settings, "POST", f'/sites/{settings["site_id"]}/connection/revoke', self._credential(settings))
+        with self._lock(settings):
+            return self._connection_request(settings, "POST", "/revoke")
+
+    def renew(self):
+        settings = self._settings()
+        with self._lock(settings):
+            state = self._secret_state(settings)
+            if "pending" not in state:
+                pending = SiteCredentialRotation(rotation_id="rot_" + uuid4().hex,
+                                                 credential="vgs_" + secrets.token_urlsafe(32)).model_dump()
+                state["pending"] = pending
+                # Both credentials and the retry identity are committed in ONE OS
+                # credential entry before any request. No secret enters cloud.json.
+                self.secrets.set(self._secret_name(settings), json.dumps(state))
+            pending = state["pending"]
+            result = self._request(settings, "POST", f'/sites/{settings["site_id"]}/connection/renew',
+                                   state["active"], pending, response_type=SiteRotationResult)
+            if result["rotation_id"] != pending["rotation_id"] or result["state"] != "active":
+                raise CloudError("cloud_rotation_response_mismatch")
+            self.secrets.set(self._secret_name(settings), pending["credential"])
+            return result
+
+    def _connection_request(self, settings, method, suffix):
+        state = self._secret_state(settings)
+        path = f'/sites/{settings["site_id"]}/connection{suffix}'
+        # A previous renewal can have committed while its reply was lost. Prove
+        # the pending credential works before promoting it; otherwise use the old
+        # credential. Never fall back after transport/schema errors.
+        if "pending" in state:
+            try:
+                result = self._request(settings, method, path, state["pending"]["credential"])
+            except CloudError as error:
+                if str(error) != "cloud_authentication_or_permission_denied": raise
+            else:
+                self.secrets.set(self._secret_name(settings), state["pending"]["credential"])
+                return result
+        return self._request(settings, method, path, state["active"])
+
+    @contextmanager
+    def _lock(self, settings):
+        # Same connection identity => same OS lock, even when a config is copied.
+        # Hard process locks are released on process death; no stale-file deletion.
+        self.lock_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+        path = self.lock_dir / (self._secret_name(settings).split(":", 1)[1] + ".lock")
+        try:
+            with FileLock(path, timeout=0):
+                yield
+        except Timeout:
+            raise CloudError("connection_command_already_running") from None
 
     def _settings(self):
         try:
@@ -124,10 +177,20 @@ class CloudConnection:
             raise CloudError("connection_config_unavailable") from None
 
     def _credential(self, settings):
+        return self._secret_state(settings)["active"]
+
+    def _secret_state(self, settings):
         secret = self.secrets.get(self._secret_name(settings))
         if not secret:
             raise CloudError("site_credential_unavailable")
-        return secret
+        try:
+            state = {"active": secret} if secret.startswith("vgs_") else json.loads(secret)
+            if set(state) not in ({"active"}, {"active", "pending"}): raise ValueError()
+            if not re.fullmatch(r"vgs_[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]", state["active"]): raise ValueError()
+            if "pending" in state: SiteCredentialRotation.model_validate(state["pending"])
+            return state
+        except (ValueError, TypeError, KeyError):
+            raise CloudError("site_credential_unavailable") from None
 
     @staticmethod
     def _secret_name(settings):
@@ -135,7 +198,7 @@ class CloudConnection:
         identity = [settings[k] for k in ("endpoint", "tenant_id", "project_id", "site_id")]
         return "site:" + sha256(json.dumps(identity).encode()).hexdigest()
 
-    def _request(self, settings, method, suffix, token, body=None):
+    def _request(self, settings, method, suffix, token, body=None, *, response_type=SiteConnection):
         base = endpoint_url(settings["endpoint"])
         url = f'{base}/api/v1/tenants/{settings["tenant_id"]}/projects/{settings["project_id"]}{suffix}'
         try:
@@ -150,7 +213,7 @@ class CloudConnection:
         if response.status_code >= 300:
             raise CloudError("cloud_request_failed_retry_same_connection")
         try:
-            result = SiteConnection.model_validate(response.json())
+            result = response_type.model_validate(response.json())
         except ValueError:
             raise CloudError("invalid_cloud_response") from None
         if any(getattr(result, key) != settings[key] for key in ("tenant_id", "project_id", "site_id", "name")):

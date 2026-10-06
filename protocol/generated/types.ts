@@ -32,6 +32,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tenants/{tenant_id}/projects/{project_id}/sites/{site_id}/connection/renew": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["SiteFederation_renew"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tenants/{tenant_id}/projects/{project_id}/sites/{site_id}/connection/revoke": {
         parameters: {
             query?: never;
@@ -155,6 +171,10 @@ export interface components {
             contribution_enabled: false;
         };
         SiteCredential: string;
+        SiteCredentialRotation: {
+            rotation_id: components["schemas"]["SiteRotationId"];
+            credential: components["schemas"]["SiteCredential"];
+        };
         SiteEnrollment: {
             site_id: components["schemas"]["SiteId"];
             name: string;
@@ -163,6 +183,10 @@ export interface components {
             credential: components["schemas"]["SiteCredential"];
         };
         SiteId: string;
+        SiteRotationId: string;
+        SiteRotationResult: {
+            rotation_id: components["schemas"]["SiteRotationId"];
+        } & components["schemas"]["SiteConnection"];
     };
     responses: never;
     parameters: never;
@@ -291,6 +315,106 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SiteConnection"];
+                };
+            };
+            /** @description The server could not understand the request due to invalid syntax. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description Access is unauthorized. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description Access is forbidden. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description The server cannot find the requested resource. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description The request conflicts with the current state of the server. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description Client error */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description Client error */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+        };
+    };
+    SiteFederation_renew: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenant_id: components["schemas"]["BackendIdentifier"];
+                project_id: components["schemas"]["BackendIdentifier"];
+                site_id: components["schemas"]["SiteId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SiteCredentialRotation"];
+            };
+        };
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteRotationResult"];
                 };
             };
             /** @description The server could not understand the request due to invalid syntax. */

@@ -422,6 +422,38 @@
                 "not": {}
             }
         },
+        "SiteCredentialRotation": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SiteCredentialRotation.json",
+            "type": "object",
+            "properties": {
+                "rotation_id": {
+                    "$ref": "SiteRotationId.json"
+                },
+                "credential": {
+                    "$ref": "SiteCredential.json"
+                }
+            },
+            "required": [
+                "rotation_id",
+                "credential"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "SiteRotationId": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SiteRotationId.json",
+            "type": "string",
+            "pattern": "^rot_[a-f0-9]{32}(?![\\s\\S])"
+        },
+        "SiteCredential": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SiteCredential.json",
+            "type": "string",
+            "pattern": "^vgs_[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048](?![\\s\\S])"
+        },
         "SiteEnrollment": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "SiteEnrollment.json",
@@ -458,12 +490,6 @@
             "$id": "SiteId.json",
             "type": "string",
             "pattern": "^sit_[a-f0-9]{32}(?![\\s\\S])"
-        },
-        "SiteCredential": {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "$id": "SiteCredential.json",
-            "type": "string",
-            "pattern": "^vgs_[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048](?![\\s\\S])"
         },
         "SiteConnection": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -526,6 +552,24 @@
                 "credential_expires_at",
                 "consumption_enabled",
                 "contribution_enabled"
+            ]
+        },
+        "SiteRotationResult": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SiteRotationResult.json",
+            "type": "object",
+            "properties": {
+                "rotation_id": {
+                    "$ref": "SiteRotationId.json"
+                }
+            },
+            "required": [
+                "rotation_id"
+            ],
+            "allOf": [
+                {
+                    "$ref": "SiteConnection.json"
+                }
             ],
             "unevaluatedProperties": {
                 "not": {}

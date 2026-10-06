@@ -18,7 +18,7 @@ def main():
     profile.add_argument("provider", choices=["vast", "runpod", "theta", "kubernetes", "simulator"])
     cloud = commands.add_parser("cloud", help="Explicit cloud connection; does not enable spending or contribution")
     cloud_commands = cloud.add_subparsers(dest="cloud_action", required=True)
-    for name in ("connect", "status", "disconnect"):
+    for name in ("connect", "status", "disconnect", "renew"):
         connection = cloud_commands.add_parser(name)
         connection.add_argument("--config", type=Path, default=Path.home() / ".config/vgpu-local/cloud.json")
         if name == "connect":
@@ -49,6 +49,8 @@ def main():
                                         name=args.name, user_access_token=os.environ.get("VGPU_USER_ACCESS_TOKEN", ""))
             elif args.cloud_action == "status":
                 result = client.status()
+            elif args.cloud_action == "renew":
+                result = client.renew()
             else:
                 result = client.disconnect()
         elif args.action == "capabilities":

@@ -10,6 +10,7 @@ dependencies = [
     "rfc8785==0.1.4",
     "jsonschema==4.26.0",
     "keyring==25.7.0",
+    "filelock==4.0.12",
 ]
 
 [project.scripts]

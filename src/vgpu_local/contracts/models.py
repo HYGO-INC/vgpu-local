@@ -103,6 +103,16 @@ class SiteConnection(ContractModel):
     contribution_enabled: Literal[False]
 
 
+class SiteCredentialRotation(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    rotation_id: str = Field(..., pattern='^rot_[a-f0-9]{32}(?![\\s\\S])')
+    credential: str = Field(
+        ..., pattern='^vgs_[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048](?![\\s\\S])'
+    )
+
+
 class SiteEnrollment(ContractModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -113,3 +123,10 @@ class SiteEnrollment(ContractModel):
     credential: str = Field(
         ..., pattern='^vgs_[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048](?![\\s\\S])'
     )
+
+
+class SiteRotationResult(SiteConnection):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    rotation_id: str = Field(..., pattern='^rot_[a-f0-9]{32}(?![\\s\\S])')
