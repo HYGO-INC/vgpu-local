@@ -8,6 +8,10 @@ job submission, provider adapters and an offline fault simulator are implemented
 Cloud federation, automatic overflow execution, the local console and capacity
 contribution are planned; this release does not implement those services.
 
+**Release timing:** public release is planned for when the vgpu.com site is ready.
+Development stays local while the remote's visibility does not match that policy;
+no new code, packages, images or releases should be published before then.
+
 Local tools require no vgpu.com login or private packages. Importing the library,
 rendering jobs and running the tests make no provider calls. Live cluster access
 requires an explicit kubeconfig context; provider SDK calls require credentials.
@@ -55,6 +59,10 @@ performed. This tool uses your selected kubeconfig permissions.
 Inventory reports **allocatable resources, not currently free GPUs**. Kubernetes
 owns placement and admission. Multiple consumer cards and supported enterprise
 partitions can coexist in a site without pretending they have identical capabilities.
+
+`--gpus N` requests N devices on **one worker**, even if the cluster has many
+workers. Distributed JobSets, HAMi sharing setup, DRA claims, VM pass-through and
+multi-GPU video recipes remain planned. See the [support matrix and engine choices](docs/gpu-modes.md).
 
 ## Providers and overflow
 

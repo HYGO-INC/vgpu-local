@@ -8,7 +8,8 @@ def capabilities(provider: str) -> BackendCapabilities:
               "kubernetes": "kubernetes", "simulator": "simulator"}[provider]
     return BackendCapabilities(
         provider=provider, engine=engine, allocation_modes=["whole_device"],
-        supports_multi_node=provider == "kubernetes",
+        # The native Job renderer creates one Pod; cluster size is not job support.
+        supports_multi_node=False,
         # Restrict to the subset implemented by these adapters, not vendor marketing.
         supports_stop=provider == "theta",
         supports_spot=provider in {"vast", "runpod", "simulator"},
