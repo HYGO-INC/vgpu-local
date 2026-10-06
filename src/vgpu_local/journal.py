@@ -1,0 +1,82 @@
+"""Single-site durable operation receipts; cloud financial state lives elsewhere."""
+from contextlib import contextmanager
+import hashlib
+import json
+from pathlib import Path
+import sqlite3
+
+import rfc8785
+
+from .errors import KeyConflict
+
+
+def fingerprint(value: dict) -> str:
+    return hashlib.sha256(rfc8785.dumps(value)).hexdigest()
+
+
+def scope(request) -> str:
+    return fingerprint({key: getattr(request, key) for key in (
+        "tenant_id", "project_id", "account_id", "provider", "operation_id", "generation")})
+
+
+class Journal:
+    def __init__(self, path: str | Path):
+        self.path = str(path)
+        with self.connection() as db:
+            db.execute("""CREATE TABLE IF NOT EXISTS operations (
+                scope TEXT PRIMARY KEY, fingerprint TEXT NOT NULL,
+                receipt TEXT NOT NULL
+            )""")
+
+    @contextmanager
+    def connection(self):
+        db = sqlite3.connect(self.path, timeout=30, isolation_level=None)
+        db.row_factory = sqlite3.Row
+        try:
+            db.execute("PRAGMA busy_timeout=30000")
+            db.execute("BEGIN IMMEDIATE")
+            yield db
+            db.commit()
+        except BaseException:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    def begin(self, key: str, request: dict, initial: dict) -> tuple[bool, dict]:
+        digest = fingerprint(request)
+        with self.connection() as db:
+            row = db.execute("SELECT * FROM operations WHERE scope=?", (key,)).fetchone()
+            if row:
+                if row["fingerprint"] != digest:
+                    raise KeyConflict("operation identity is already bound to another request")
+                return False, json.loads(row["receipt"])
+            db.execute("INSERT INTO operations VALUES (?, ?, ?)", (key, digest, json.dumps(initial)))
+        return True, initial
+
+    def read(self, key: str) -> dict:
+        with self.connection() as db:
+            row = db.execute("SELECT receipt FROM operations WHERE scope=?", (key,)).fetchone()
+            if row is None:
+                raise KeyError(key)
+            return json.loads(row["receipt"])
+
+    def change(self, key: str, update) -> dict:
+        with self.connection() as db:
+            row = db.execute("SELECT receipt FROM operations WHERE scope=?", (key,)).fetchone()
+            if row is None:
+                raise KeyError(key)
+            receipt = update(json.loads(row["receipt"]))
+            db.execute("UPDATE operations SET receipt=? WHERE scope=?", (json.dumps(receipt), key))
+            return receipt
+
+    def transition(self, key: str, expected: str, state: str) -> tuple[bool, dict]:
+        claimed = False
+        def update(row):
+            nonlocal claimed
+            if row["state"] == expected:
+                row["state"] = state
+                claimed = True
+            return row
+        receipt = self.change(key, update)
+        return claimed, receipt
