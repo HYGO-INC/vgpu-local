@@ -148,6 +148,104 @@ export interface components {
             /** @enum {string} */
             data_policy: "local_only" | "artifacts_only";
         };
+        Interruption: {
+            /** @enum {number} */
+            schema_version: 1;
+            interruption_id: components["schemas"]["InterruptionId"];
+            version: components["schemas"]["PositiveInteger"];
+            /** @enum {string} */
+            phase: "scheduled" | "releasing" | "completed" | "canceled";
+            source: components["schemas"]["InterruptionSourceNotice"];
+            release_by_ms: components["schemas"]["NonnegativeInteger"] | null;
+            signal_at_ms: components["schemas"]["NonnegativeInteger"] | null;
+        } & components["schemas"]["InterruptionScope"];
+        /** @enum {string} */
+        InterruptionAction: "ack" | "ready" | "request_extension";
+        InterruptionEvent: {
+            /** @enum {string} */
+            specversion: "1.0";
+            id: string;
+            /** @enum {string} */
+            source: "urn:vgpu:interruptions";
+            /** @enum {string} */
+            type: "com.vgpu.interruption.changed.v1";
+            subject: string;
+            /** @enum {string} */
+            datacontenttype: "application/json";
+            data: components["schemas"]["Interruption"];
+        };
+        InterruptionId: string;
+        InterruptionReceipt: {
+            /** @enum {number} */
+            schema_version: 1;
+            request_id: components["schemas"]["InterruptionRequestId"];
+            interruption_id: components["schemas"]["InterruptionId"];
+            participant_id: components["schemas"]["BackendIdentifier"];
+            action: components["schemas"]["InterruptionAction"];
+            request_fingerprint: string;
+            /** @enum {string} */
+            status: "accepted" | "rejected";
+            code: components["schemas"]["BackendIdentifier"];
+            notice_version: components["schemas"]["PositiveInteger"] | null;
+            cursor: components["schemas"]["PositiveInteger"];
+            /** @enum {string} */
+            checkpoint_status: "none" | "unverified";
+        } & components["schemas"]["InterruptionScope"];
+        InterruptionRequest: {
+            /** @enum {number} */
+            schema_version: 1;
+            request_id: components["schemas"]["InterruptionRequestId"];
+            interruption_id: components["schemas"]["InterruptionId"];
+            interruption_version: components["schemas"]["PositiveInteger"];
+            participant_id: components["schemas"]["BackendIdentifier"];
+            action: components["schemas"]["InterruptionAction"];
+            checkpoint_manifest: components["schemas"]["BackendIdentifier"] | null;
+            requested_release_by_ms: components["schemas"]["NonnegativeInteger"] | null;
+        } & components["schemas"]["InterruptionScope"];
+        InterruptionRequestId: string;
+        InterruptionScope: {
+            tenant_id: components["schemas"]["BackendIdentifier"];
+            project_id: components["schemas"]["BackendIdentifier"];
+            lease_id: components["schemas"]["BackendIdentifier"];
+            job_id: components["schemas"]["BackendIdentifier"];
+            attempt_id: components["schemas"]["BackendIdentifier"];
+            generation: components["schemas"]["PositiveInteger"];
+            controller_epoch: components["schemas"]["PositiveInteger"];
+            agent_session_id: components["schemas"]["InterruptionSessionId"];
+        };
+        InterruptionSessionId: string;
+        InterruptionSnapshot: {
+            /** @enum {number} */
+            schema_version: 1;
+            cursor: components["schemas"]["NonnegativeInteger"];
+            interruptions: components["schemas"]["Interruption"][];
+        } & components["schemas"]["InterruptionScope"];
+        InterruptionSourceNotice: {
+            source_id: components["schemas"]["BackendIdentifier"];
+            source_event_id: components["schemas"]["BackendIdentifier"];
+            source_revision: components["schemas"]["PositiveInteger"];
+            /** @enum {string} */
+            authority: "provider" | "vgpu" | "local_owner";
+            /** @enum {string} */
+            state: "active" | "withdrawn";
+            /** @enum {string} */
+            kind: "preempt" | "stop" | "reboot" | "advisory";
+            reason: components["schemas"]["BackendIdentifier"];
+            observed_at_ms: components["schemas"]["NonnegativeInteger"];
+            /** @enum {string} */
+            source_time_kind: "action_at" | "not_before" | "vgpu_policy" | "unknown";
+            source_action_at_ms: components["schemas"]["NonnegativeInteger"] | null;
+            source_not_before_ms: components["schemas"]["NonnegativeInteger"] | null;
+            release_by_ms: components["schemas"]["NonnegativeInteger"] | null;
+            signal_at_ms: components["schemas"]["NonnegativeInteger"] | null;
+            safety_margin_ms: components["schemas"]["NonnegativeInteger"];
+            clock_uncertainty_ms: components["schemas"]["NonnegativeInteger"];
+            mapping_policy: components["schemas"]["BackendIdentifier"];
+            /** @enum {string} */
+            notice_class: "best_effort" | "controlled" | "no_notice";
+            allowed_actions: components["schemas"]["InterruptionAction"][];
+            extension_limit_ms: components["schemas"]["NonnegativeInteger"] | null;
+        };
         /** Format: int64 */
         NonnegativeInteger: number;
         /** Format: int64 */

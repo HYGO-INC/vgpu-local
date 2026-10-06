@@ -4,9 +4,10 @@ Open-source tools for GPU pools at home, in an office, or in a private cloud,
 with an optional connection to vgpu.com for additional capacity.
 
 **Status: experimental engineering foundation.** Local inventory, native queued
-job submission, provider adapters and an offline fault simulator are implemented.
-Cloud federation, automatic overflow execution, the local console and capacity
-contribution are planned; this release does not implement those services.
+job submission, provider adapters, an offline fault simulator, scoped cloud
+enrollment/renewal, and a native interruption controller/file transport are
+implemented. Automatic overflow execution, the local console and capacity
+contribution still require integration and qualification.
 
 **Release timing:** public release is planned for when the vgpu.com site is ready.
 Development stays local while the remote's visibility does not match that policy;
@@ -72,8 +73,14 @@ live supplier qualification is still pending. See [provider boundaries](docs/pro
 
 `examples/local-only.json` disables cloud use. The overflow policy library checks
 budgets, regions, allowed providers, data-export readiness and local execution
-fencing. It is an eligibility check, **not an implemented cloud connection or an
-atomic spending reservation**. See [architecture and remaining work](docs/architecture.md).
+fencing. It is an eligibility check, **not an automatic submitter or an atomic
+spending reservation**. The separate [cloud connection](docs/cloud-connection.md)
+enrolls and renews a scoped installation without enabling spending or contribution.
+See [architecture and remaining work](docs/architecture.md).
+
+The [interruption protocol](docs/interruptions.md) provides versioned warnings,
+acknowledgement/readiness receipts, cancellation, explicit extension grants and a
+Linux file channel. Reclamation and billing remain external authority boundaries.
 
 ## Development
 
@@ -84,7 +91,7 @@ uv sync --locked
 pnpm check
 ```
 
-Edit `protocol/backend.tsp`, then `pnpm generate`. TypeSpec generates OpenAPI 3.1,
+Edit `protocol/backend.tsp`, `federation.tsp` or `interruptions.tsp`, then `pnpm generate`. TypeSpec generates OpenAPI 3.1,
 JSON Schema, TypeScript types and Python models. A common fixture set is checked
 against JSON Schema, Ajv and Python/Pydantic. Generated files must remain in sync.
 The protocol is experimental and defines no deployed HTTP routes.

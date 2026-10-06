@@ -956,6 +956,511 @@
           "not": {}
         }
       },
+      "Interruption": {
+        "type": "object",
+        "required": [
+          "schema_version",
+          "interruption_id",
+          "version",
+          "phase",
+          "source",
+          "release_by_ms",
+          "signal_at_ms"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "interruption_id": {
+            "$ref": "#/components/schemas/InterruptionId"
+          },
+          "version": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "releasing",
+              "completed",
+              "canceled"
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/InterruptionSourceNotice"
+          },
+          "release_by_ms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NonnegativeInteger"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "signal_at_ms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NonnegativeInteger"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        },
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/InterruptionScope"
+          }
+        ]
+      },
+      "InterruptionAction": {
+        "type": "string",
+        "enum": [
+          "ack",
+          "ready",
+          "request_extension"
+        ]
+      },
+      "InterruptionEvent": {
+        "type": "object",
+        "required": [
+          "specversion",
+          "id",
+          "source",
+          "type",
+          "subject",
+          "datacontenttype",
+          "data"
+        ],
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "enum": [
+              "1.0"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^ice_[a-f0-9]{64}(?![\\s\\S])"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "urn:vgpu:interruptions"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "com.vgpu.interruption.changed.v1"
+            ]
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 600
+          },
+          "datacontenttype": {
+            "type": "string",
+            "enum": [
+              "application/json"
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/Interruption"
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "InterruptionId": {
+        "type": "string",
+        "pattern": "^int_[a-f0-9]{32}(?![\\s\\S])"
+      },
+      "InterruptionReceipt": {
+        "type": "object",
+        "required": [
+          "schema_version",
+          "request_id",
+          "interruption_id",
+          "participant_id",
+          "action",
+          "request_fingerprint",
+          "status",
+          "code",
+          "notice_version",
+          "cursor",
+          "checkpoint_status"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "request_id": {
+            "$ref": "#/components/schemas/InterruptionRequestId"
+          },
+          "interruption_id": {
+            "$ref": "#/components/schemas/InterruptionId"
+          },
+          "participant_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "action": {
+            "$ref": "#/components/schemas/InterruptionAction"
+          },
+          "request_fingerprint": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}(?![\\s\\S])"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "rejected"
+            ]
+          },
+          "code": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "notice_version": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PositiveInteger"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cursor": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "checkpoint_status": {
+            "type": "string",
+            "enum": [
+              "none",
+              "unverified"
+            ]
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        },
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/InterruptionScope"
+          }
+        ]
+      },
+      "InterruptionRequest": {
+        "type": "object",
+        "required": [
+          "schema_version",
+          "request_id",
+          "interruption_id",
+          "interruption_version",
+          "participant_id",
+          "action",
+          "checkpoint_manifest",
+          "requested_release_by_ms"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "request_id": {
+            "$ref": "#/components/schemas/InterruptionRequestId"
+          },
+          "interruption_id": {
+            "$ref": "#/components/schemas/InterruptionId"
+          },
+          "interruption_version": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "participant_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "action": {
+            "$ref": "#/components/schemas/InterruptionAction"
+          },
+          "checkpoint_manifest": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackendIdentifier"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "requested_release_by_ms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NonnegativeInteger"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        },
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/InterruptionScope"
+          }
+        ]
+      },
+      "InterruptionRequestId": {
+        "type": "string",
+        "pattern": "^irq_[a-f0-9]{32}(?![\\s\\S])"
+      },
+      "InterruptionScope": {
+        "type": "object",
+        "required": [
+          "tenant_id",
+          "project_id",
+          "lease_id",
+          "job_id",
+          "attempt_id",
+          "generation",
+          "controller_epoch",
+          "agent_session_id"
+        ],
+        "properties": {
+          "tenant_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "project_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "lease_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "job_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "attempt_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "generation": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "controller_epoch": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "agent_session_id": {
+            "$ref": "#/components/schemas/InterruptionSessionId"
+          }
+        }
+      },
+      "InterruptionSessionId": {
+        "type": "string",
+        "pattern": "^igs_[a-f0-9]{32}(?![\\s\\S])"
+      },
+      "InterruptionSnapshot": {
+        "type": "object",
+        "required": [
+          "schema_version",
+          "cursor",
+          "interruptions"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "cursor": {
+            "$ref": "#/components/schemas/NonnegativeInteger"
+          },
+          "interruptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Interruption"
+            },
+            "maxItems": 128
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        },
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/InterruptionScope"
+          }
+        ]
+      },
+      "InterruptionSourceNotice": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "source_event_id",
+          "source_revision",
+          "authority",
+          "state",
+          "kind",
+          "reason",
+          "observed_at_ms",
+          "source_time_kind",
+          "source_action_at_ms",
+          "source_not_before_ms",
+          "release_by_ms",
+          "signal_at_ms",
+          "safety_margin_ms",
+          "clock_uncertainty_ms",
+          "mapping_policy",
+          "notice_class",
+          "allowed_actions",
+          "extension_limit_ms"
+        ],
+        "properties": {
+          "source_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "source_event_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "source_revision": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "authority": {
+            "type": "string",
+            "enum": [
+              "provider",
+              "vgpu",
+              "local_owner"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "withdrawn"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "preempt",
+              "stop",
+              "reboot",
+              "advisory"
+            ]
+          },
+          "reason": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "observed_at_ms": {
+            "$ref": "#/components/schemas/NonnegativeInteger"
+          },
+          "source_time_kind": {
+            "type": "string",
+            "enum": [
+              "action_at",
+              "not_before",
+              "vgpu_policy",
+              "unknown"
+            ]
+          },
+          "source_action_at_ms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NonnegativeInteger"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_not_before_ms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NonnegativeInteger"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "release_by_ms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NonnegativeInteger"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "signal_at_ms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NonnegativeInteger"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "safety_margin_ms": {
+            "$ref": "#/components/schemas/NonnegativeInteger"
+          },
+          "clock_uncertainty_ms": {
+            "$ref": "#/components/schemas/NonnegativeInteger"
+          },
+          "mapping_policy": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "notice_class": {
+            "type": "string",
+            "enum": [
+              "best_effort",
+              "controlled",
+              "no_notice"
+            ]
+          },
+          "allowed_actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterruptionAction"
+            },
+            "maxItems": 3
+          },
+          "extension_limit_ms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NonnegativeInteger"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
       "NonnegativeInteger": {
         "type": "integer",
         "format": "int64",

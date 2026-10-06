@@ -18,12 +18,16 @@ account or Internet connection.
   credentials in the OS credential store. Enrollment enables neither spending nor
   contribution. Client failure behavior is tested offline; production deployment
   and the browser/device login flow remain outstanding.
+- Recoverable credential renewal in the OS store, with response-loss replay and
+  revoked/expired-credential handling. Hosted deployment remains separate.
+- [Native interruption exchange](interruptions.md): durable notice/response
+  semantics, ordered CloudEvents, expected-participant readiness and Linux files.
 
 ## Work still required
 
-- Site enrollment and durable authentication, controller reconciliation, local
-  console, upgrades/restore and hardware-qualified installation profiles.
-- Hosted deployment of the federation HTTP endpoints and credential renewal.
+- Production identity integration, controller reconciliation, local console,
+  upgrades/restore and hardware-qualified installation profiles.
+- Hosted deployment of the federation HTTP endpoints and renewal service.
   The connection handshake uses `vgpu.site.v1`; it is not a live service claim.
 - Atomic budget reservations in the cloud; quotes, maximum runtime, cleanup and
   reconciliation of continuing remote costs during site disconnection.

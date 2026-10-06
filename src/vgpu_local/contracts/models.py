@@ -3,10 +3,18 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import ConfigDict, Field
 from vgpu_local.contracts.base import ContractModel
+
+type BackendIdentifier = Annotated[str, Field(..., max_length=255, min_length=1)]
+
+
+type NonnegativeInteger = Annotated[int, Field(..., ge=0, le=9007199254740991)]
+
+
+type PositiveInteger = Annotated[int, Field(..., ge=1, le=9007199254740991)]
 
 
 class ProtocolError(ContractModel):
@@ -88,6 +96,47 @@ class BurstPolicy(ContractModel):
     data_policy: Literal['local_only', 'artifacts_only']
 
 
+class InterruptionScope(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    tenant_id: str = Field(..., max_length=255, min_length=1)
+    project_id: str = Field(..., max_length=255, min_length=1)
+    lease_id: str = Field(..., max_length=255, min_length=1)
+    job_id: str = Field(..., max_length=255, min_length=1)
+    attempt_id: str = Field(..., max_length=255, min_length=1)
+    generation: int = Field(..., ge=1, le=9007199254740991)
+    controller_epoch: int = Field(..., ge=1, le=9007199254740991)
+    agent_session_id: str = Field(..., pattern='^igs_[a-f0-9]{32}(?![\\s\\S])')
+
+
+class InterruptionSourceNotice(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    source_id: str = Field(..., max_length=255, min_length=1)
+    source_event_id: str = Field(..., max_length=255, min_length=1)
+    source_revision: int = Field(..., ge=1, le=9007199254740991)
+    authority: Literal['provider', 'vgpu', 'local_owner']
+    state: Literal['active', 'withdrawn']
+    kind: Literal['preempt', 'stop', 'reboot', 'advisory']
+    reason: str = Field(..., max_length=255, min_length=1)
+    observed_at_ms: int = Field(..., ge=0, le=9007199254740991)
+    source_time_kind: Literal['action_at', 'not_before', 'vgpu_policy', 'unknown']
+    source_action_at_ms: NonnegativeInteger | None
+    source_not_before_ms: NonnegativeInteger | None
+    release_by_ms: NonnegativeInteger | None
+    signal_at_ms: NonnegativeInteger | None
+    safety_margin_ms: int = Field(..., ge=0, le=9007199254740991)
+    clock_uncertainty_ms: int = Field(..., ge=0, le=9007199254740991)
+    mapping_policy: str = Field(..., max_length=255, min_length=1)
+    notice_class: Literal['best_effort', 'controlled', 'no_notice']
+    allowed_actions: list[Literal['ack', 'ready', 'request_extension']] = Field(
+        ..., max_length=3
+    )
+    extension_limit_ms: NonnegativeInteger | None
+
+
 class SiteConnection(ContractModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -130,3 +179,71 @@ class SiteRotationResult(SiteConnection):
         extra='forbid',
     )
     rotation_id: str = Field(..., pattern='^rot_[a-f0-9]{32}(?![\\s\\S])')
+
+
+class Interruption(InterruptionScope):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    schema_version: Literal[1]
+    interruption_id: str = Field(..., pattern='^int_[a-f0-9]{32}(?![\\s\\S])')
+    version: int = Field(..., ge=1, le=9007199254740991)
+    phase: Literal['scheduled', 'releasing', 'completed', 'canceled']
+    source: InterruptionSourceNotice
+    release_by_ms: NonnegativeInteger | None
+    signal_at_ms: NonnegativeInteger | None
+
+
+class InterruptionEvent(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+        regex_engine="python-re",
+    )
+    specversion: Literal['1.0']
+    id: str = Field(..., pattern='^ice_[a-f0-9]{64}(?![\\s\\S])')
+    source: Literal['urn:vgpu:interruptions']
+    type: Literal['com.vgpu.interruption.changed.v1']
+    subject: str = Field(..., max_length=600, min_length=1)
+    datacontenttype: Literal['application/json']
+    data: Interruption
+
+
+class InterruptionReceipt(InterruptionScope):
+    model_config = ConfigDict(
+        extra='forbid',
+        regex_engine="python-re",
+    )
+    schema_version: Literal[1]
+    request_id: str = Field(..., pattern='^irq_[a-f0-9]{32}(?![\\s\\S])')
+    interruption_id: str = Field(..., pattern='^int_[a-f0-9]{32}(?![\\s\\S])')
+    participant_id: str = Field(..., max_length=255, min_length=1)
+    action: Literal['ack', 'ready', 'request_extension']
+    request_fingerprint: str = Field(..., pattern='^sha256:[a-f0-9]{64}(?![\\s\\S])')
+    status: Literal['accepted', 'rejected']
+    code: str = Field(..., max_length=255, min_length=1)
+    notice_version: PositiveInteger | None
+    cursor: int = Field(..., ge=1, le=9007199254740991)
+    checkpoint_status: Literal['none', 'unverified']
+
+
+class InterruptionRequest(InterruptionScope):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    schema_version: Literal[1]
+    request_id: str = Field(..., pattern='^irq_[a-f0-9]{32}(?![\\s\\S])')
+    interruption_id: str = Field(..., pattern='^int_[a-f0-9]{32}(?![\\s\\S])')
+    interruption_version: int = Field(..., ge=1, le=9007199254740991)
+    participant_id: str = Field(..., max_length=255, min_length=1)
+    action: Literal['ack', 'ready', 'request_extension']
+    checkpoint_manifest: BackendIdentifier | None
+    requested_release_by_ms: NonnegativeInteger | None
+
+
+class InterruptionSnapshot(InterruptionScope):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    schema_version: Literal[1]
+    cursor: int = Field(..., ge=0, le=9007199254740991)
+    interruptions: list[Interruption] = Field(..., max_length=128)

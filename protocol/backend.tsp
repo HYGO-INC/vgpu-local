@@ -1,5 +1,6 @@
 // Public source of truth. Hosted consumers import a pinned, hash-checked copy.
 import "./federation.tsp";
+import "./interruptions.tsp";
 namespace Vgpu.V1;
 
 @minLength(1)

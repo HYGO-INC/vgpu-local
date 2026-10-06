@@ -22,7 +22,7 @@ try {
     '--input-file-type', 'openapi', '--output', resolve(temp, 'models.py'),
     '--output-model-type', 'pydantic_v2.BaseModel', '--base-class', 'vgpu_local.contracts.base.ContractModel',
     '--target-python-version', '3.12', '--field-constraints', '--enum-field-as-literal', 'all',
-    '--collapse-root-models', '--disable-timestamp', '--extra-fields', 'forbid', '--formatters', 'black', 'isort'],
+    '--collapse-root-models', '--use-type-alias', '--use-missing-sentinel', '--disable-timestamp', '--extra-fields', 'forbid', '--formatters', 'black', 'isort'],
   { cwd: root, stdio: 'inherit' });
   const pairs = [
     ['spec/openapi.json', 'protocol/generated/openapi.json'],

@@ -591,6 +591,589 @@
             "unevaluatedProperties": {
                 "not": {}
             }
+        },
+        "InterruptionScope": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "InterruptionScope.json",
+            "type": "object",
+            "properties": {
+                "tenant_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "project_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "lease_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "job_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "attempt_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "generation": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "controller_epoch": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "agent_session_id": {
+                    "$ref": "InterruptionSessionId.json"
+                }
+            },
+            "required": [
+                "tenant_id",
+                "project_id",
+                "lease_id",
+                "job_id",
+                "attempt_id",
+                "generation",
+                "controller_epoch",
+                "agent_session_id"
+            ]
+        },
+        "InterruptionSessionId": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "InterruptionSessionId.json",
+            "type": "string",
+            "pattern": "^igs_[a-f0-9]{32}(?![\\s\\S])"
+        },
+        "InterruptionSourceNotice": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "InterruptionSourceNotice.json",
+            "type": "object",
+            "properties": {
+                "source_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "source_event_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "source_revision": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "authority": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "provider"
+                        },
+                        {
+                            "type": "string",
+                            "const": "vgpu"
+                        },
+                        {
+                            "type": "string",
+                            "const": "local_owner"
+                        }
+                    ]
+                },
+                "state": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "active"
+                        },
+                        {
+                            "type": "string",
+                            "const": "withdrawn"
+                        }
+                    ]
+                },
+                "kind": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "preempt"
+                        },
+                        {
+                            "type": "string",
+                            "const": "stop"
+                        },
+                        {
+                            "type": "string",
+                            "const": "reboot"
+                        },
+                        {
+                            "type": "string",
+                            "const": "advisory"
+                        }
+                    ]
+                },
+                "reason": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "observed_at_ms": {
+                    "$ref": "NonnegativeInteger.json"
+                },
+                "source_time_kind": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "action_at"
+                        },
+                        {
+                            "type": "string",
+                            "const": "not_before"
+                        },
+                        {
+                            "type": "string",
+                            "const": "vgpu_policy"
+                        },
+                        {
+                            "type": "string",
+                            "const": "unknown"
+                        }
+                    ]
+                },
+                "source_action_at_ms": {
+                    "anyOf": [
+                        {
+                            "$ref": "NonnegativeInteger.json"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "source_not_before_ms": {
+                    "anyOf": [
+                        {
+                            "$ref": "NonnegativeInteger.json"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "release_by_ms": {
+                    "anyOf": [
+                        {
+                            "$ref": "NonnegativeInteger.json"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "signal_at_ms": {
+                    "anyOf": [
+                        {
+                            "$ref": "NonnegativeInteger.json"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "safety_margin_ms": {
+                    "$ref": "NonnegativeInteger.json"
+                },
+                "clock_uncertainty_ms": {
+                    "$ref": "NonnegativeInteger.json"
+                },
+                "mapping_policy": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "notice_class": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "best_effort"
+                        },
+                        {
+                            "type": "string",
+                            "const": "controlled"
+                        },
+                        {
+                            "type": "string",
+                            "const": "no_notice"
+                        }
+                    ]
+                },
+                "allowed_actions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "InterruptionAction.json"
+                    },
+                    "maxItems": 3
+                },
+                "extension_limit_ms": {
+                    "anyOf": [
+                        {
+                            "$ref": "NonnegativeInteger.json"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "source_id",
+                "source_event_id",
+                "source_revision",
+                "authority",
+                "state",
+                "kind",
+                "reason",
+                "observed_at_ms",
+                "source_time_kind",
+                "source_action_at_ms",
+                "source_not_before_ms",
+                "release_by_ms",
+                "signal_at_ms",
+                "safety_margin_ms",
+                "clock_uncertainty_ms",
+                "mapping_policy",
+                "notice_class",
+                "allowed_actions",
+                "extension_limit_ms"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "InterruptionAction": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "InterruptionAction.json",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "const": "ack"
+                },
+                {
+                    "type": "string",
+                    "const": "ready"
+                },
+                {
+                    "type": "string",
+                    "const": "request_extension"
+                }
+            ]
+        },
+        "Interruption": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "Interruption.json",
+            "type": "object",
+            "properties": {
+                "schema_version": {
+                    "type": "number",
+                    "const": 1
+                },
+                "interruption_id": {
+                    "$ref": "InterruptionId.json"
+                },
+                "version": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "phase": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "scheduled"
+                        },
+                        {
+                            "type": "string",
+                            "const": "releasing"
+                        },
+                        {
+                            "type": "string",
+                            "const": "completed"
+                        },
+                        {
+                            "type": "string",
+                            "const": "canceled"
+                        }
+                    ]
+                },
+                "source": {
+                    "$ref": "InterruptionSourceNotice.json"
+                },
+                "release_by_ms": {
+                    "anyOf": [
+                        {
+                            "$ref": "NonnegativeInteger.json"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "signal_at_ms": {
+                    "anyOf": [
+                        {
+                            "$ref": "NonnegativeInteger.json"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "schema_version",
+                "interruption_id",
+                "version",
+                "phase",
+                "source",
+                "release_by_ms",
+                "signal_at_ms"
+            ],
+            "allOf": [
+                {
+                    "$ref": "InterruptionScope.json"
+                }
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "InterruptionId": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "InterruptionId.json",
+            "type": "string",
+            "pattern": "^int_[a-f0-9]{32}(?![\\s\\S])"
+        },
+        "InterruptionSnapshot": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "InterruptionSnapshot.json",
+            "type": "object",
+            "properties": {
+                "schema_version": {
+                    "type": "number",
+                    "const": 1
+                },
+                "cursor": {
+                    "$ref": "NonnegativeInteger.json"
+                },
+                "interruptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "Interruption.json"
+                    },
+                    "maxItems": 128
+                }
+            },
+            "required": [
+                "schema_version",
+                "cursor",
+                "interruptions"
+            ],
+            "allOf": [
+                {
+                    "$ref": "InterruptionScope.json"
+                }
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "InterruptionRequest": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "InterruptionRequest.json",
+            "type": "object",
+            "properties": {
+                "schema_version": {
+                    "type": "number",
+                    "const": 1
+                },
+                "request_id": {
+                    "$ref": "InterruptionRequestId.json"
+                },
+                "interruption_id": {
+                    "$ref": "InterruptionId.json"
+                },
+                "interruption_version": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "participant_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "action": {
+                    "$ref": "InterruptionAction.json"
+                },
+                "checkpoint_manifest": {
+                    "anyOf": [
+                        {
+                            "$ref": "BackendIdentifier.json"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "requested_release_by_ms": {
+                    "anyOf": [
+                        {
+                            "$ref": "NonnegativeInteger.json"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "schema_version",
+                "request_id",
+                "interruption_id",
+                "interruption_version",
+                "participant_id",
+                "action",
+                "checkpoint_manifest",
+                "requested_release_by_ms"
+            ],
+            "allOf": [
+                {
+                    "$ref": "InterruptionScope.json"
+                }
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "InterruptionRequestId": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "InterruptionRequestId.json",
+            "type": "string",
+            "pattern": "^irq_[a-f0-9]{32}(?![\\s\\S])"
+        },
+        "InterruptionReceipt": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "InterruptionReceipt.json",
+            "type": "object",
+            "properties": {
+                "schema_version": {
+                    "type": "number",
+                    "const": 1
+                },
+                "request_id": {
+                    "$ref": "InterruptionRequestId.json"
+                },
+                "interruption_id": {
+                    "$ref": "InterruptionId.json"
+                },
+                "participant_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "action": {
+                    "$ref": "InterruptionAction.json"
+                },
+                "request_fingerprint": {
+                    "type": "string",
+                    "pattern": "^sha256:[a-f0-9]{64}(?![\\s\\S])"
+                },
+                "status": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "accepted"
+                        },
+                        {
+                            "type": "string",
+                            "const": "rejected"
+                        }
+                    ]
+                },
+                "code": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "notice_version": {
+                    "anyOf": [
+                        {
+                            "$ref": "PositiveInteger.json"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "cursor": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "checkpoint_status": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "none"
+                        },
+                        {
+                            "type": "string",
+                            "const": "unverified"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "schema_version",
+                "request_id",
+                "interruption_id",
+                "participant_id",
+                "action",
+                "request_fingerprint",
+                "status",
+                "code",
+                "notice_version",
+                "cursor",
+                "checkpoint_status"
+            ],
+            "allOf": [
+                {
+                    "$ref": "InterruptionScope.json"
+                }
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "InterruptionEvent": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "InterruptionEvent.json",
+            "type": "object",
+            "properties": {
+                "specversion": {
+                    "type": "string",
+                    "const": "1.0"
+                },
+                "id": {
+                    "type": "string",
+                    "pattern": "^ice_[a-f0-9]{64}(?![\\s\\S])"
+                },
+                "source": {
+                    "type": "string",
+                    "const": "urn:vgpu:interruptions"
+                },
+                "type": {
+                    "type": "string",
+                    "const": "com.vgpu.interruption.changed.v1"
+                },
+                "subject": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 600
+                },
+                "datacontenttype": {
+                    "type": "string",
+                    "const": "application/json"
+                },
+                "data": {
+                    "$ref": "Interruption.json"
+                }
+            },
+            "required": [
+                "specversion",
+                "id",
+                "source",
+                "type",
+                "subject",
+                "datacontenttype",
+                "data"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
         }
     }
 }
