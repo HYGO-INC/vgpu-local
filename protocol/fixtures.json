@@ -987,5 +987,111 @@
       "consumption_enabled": 0,
       "contribution_enabled": false
     }
+  },
+  {
+    "name": "invalid-Interruption",
+    "contract": "Interruption",
+    "valid": false,
+    "path": "/phase",
+    "document": {
+      "tenant_id": "tenant-a",
+      "project_id": "project-a",
+      "lease_id": "lease-a",
+      "job_id": "job-a",
+      "attempt_id": "attempt-a",
+      "generation": 1,
+      "controller_epoch": 2,
+      "agent_session_id": "igs_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "schema_version": 1,
+      "interruption_id": "int_d353c9ca0b29ce8fa3cad837b550bc83",
+      "version": 1,
+      "phase": "ack",
+      "source": {
+        "source_id": "provider-a",
+        "source_event_id": "event-a",
+        "source_revision": 1,
+        "authority": "provider",
+        "state": "active",
+        "kind": "preempt",
+        "reason": "spot",
+        "observed_at_ms": 1000,
+        "source_time_kind": "not_before",
+        "source_action_at_ms": null,
+        "source_not_before_ms": 4000,
+        "release_by_ms": null,
+        "signal_at_ms": null,
+        "safety_margin_ms": 0,
+        "clock_uncertainty_ms": 500,
+        "mapping_policy": "provider.v1",
+        "notice_class": "best_effort",
+        "allowed_actions": [
+          "ack",
+          "ready"
+        ],
+        "extension_limit_ms": null
+      },
+      "release_by_ms": null,
+      "signal_at_ms": null
+    }
+  },
+  {
+    "name": "invalid-InterruptionSnapshot",
+    "contract": "InterruptionSnapshot",
+    "valid": false,
+    "path": "/cursor",
+    "document": {
+      "tenant_id": "tenant-a",
+      "project_id": "project-a",
+      "lease_id": "lease-a",
+      "job_id": "job-a",
+      "attempt_id": "attempt-a",
+      "generation": 1,
+      "controller_epoch": 2,
+      "agent_session_id": "igs_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "schema_version": 1,
+      "cursor": -1,
+      "interruptions": [
+        {
+          "tenant_id": "tenant-a",
+          "project_id": "project-a",
+          "lease_id": "lease-a",
+          "job_id": "job-a",
+          "attempt_id": "attempt-a",
+          "generation": 1,
+          "controller_epoch": 2,
+          "agent_session_id": "igs_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "schema_version": 1,
+          "interruption_id": "int_d353c9ca0b29ce8fa3cad837b550bc83",
+          "version": 1,
+          "phase": "scheduled",
+          "source": {
+            "source_id": "provider-a",
+            "source_event_id": "event-a",
+            "source_revision": 1,
+            "authority": "provider",
+            "state": "active",
+            "kind": "preempt",
+            "reason": "spot",
+            "observed_at_ms": 1000,
+            "source_time_kind": "not_before",
+            "source_action_at_ms": null,
+            "source_not_before_ms": 4000,
+            "release_by_ms": null,
+            "signal_at_ms": null,
+            "safety_margin_ms": 0,
+            "clock_uncertainty_ms": 500,
+            "mapping_policy": "provider.v1",
+            "notice_class": "best_effort",
+            "allowed_actions": [
+              "ack",
+              "ready"
+            ],
+            "extension_limit_ms": null
+          },
+          "release_by_ms": null,
+          "signal_at_ms": null
+        }
+      ]
+    }
   }
 ]
