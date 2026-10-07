@@ -34,8 +34,9 @@ also stays in the OS credential store, never this metadata file.
 If enrollment times out, retry the same command/config after refreshing the user
 session if needed. The same site ID and key are reused. Enrollment replay never
 extends credential validity. The server sets expiration; expired or revoked sites
-cannot authenticate status calls. Use `cloud renew` before expiry to replace the
-site credential and renew its lifetime. An expired/revoked connection requires
+cannot authenticate status calls. A connected background runtime checks on startup
+and every hour, renewing active credentials with at most one day left. If you use
+only the cloud CLI, use `cloud renew` before expiry. An expired/revoked connection requires
 user-authorized enrollment with a new configuration. `connect` replays initial
 enrollment; use `status`/`renew` to manage an already renewed connection.
 
@@ -45,6 +46,11 @@ loss: it sends the same identity and key. The server accepts the old key only fo
 that exact committed rotation while its replacement is current. Normal requests
 reject the old key immediately. A replay never extends the new expiry again.
 `cloud status` can independently confirm the replacement and recover local state.
+The background runtime performs this recovery automatically before reporting or
+fetching work. It resumes an uncommitted pending renewal with the same key and
+retry identity. No manual command is needed while the connected runtime is running.
+If the computer is offline until its key expires, explicit enrollment is still
+required; the program never silently changes accounts or reactivates a revoked site.
 
 Commands share a hard OS file lock for the connection identity, including copied
 configs. Locks contain no credentials and release when the process dies. This uses
@@ -58,6 +64,6 @@ retryable. The cloud-side owner's revoke API can revoke the site when its key is
 lost. Responses and redirects cannot choose a different scope or forward tokens.
 HTTP is accepted only on numeric loopback addresses for integration tests.
 
-Browser pairing and authenticated job dispatch remain separate integration work.
-This connection implementation does not start local jobs from the website or
-provide automatic cloud overflow.
+The optional [background runtime](local-runtime.md) exchanges authenticated recipe
+commands with the account API. Browser pairing and the production website dashboard
+remain separate integration work. This connection does not provide cloud overflow.

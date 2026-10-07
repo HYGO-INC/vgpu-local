@@ -114,8 +114,8 @@ class CloudConnection:
         """Non-secret enrollment identity for explicitly enabling hosted management."""
         return self._settings()
 
-    def exchange(self, batch):
-        settings = self._settings()
+    def exchange(self, batch, *, expected_identity=None):
+        settings = self._settings(expected_identity)
         body = LocalExchange.model_validate(batch).model_dump()
         with self._lock(settings):
             if "pending" in self._secret_state(settings):
@@ -132,21 +132,38 @@ class CloudConnection:
     def renew(self):
         settings = self._settings()
         with self._lock(settings):
-            state = self._secret_state(settings)
-            if "pending" not in state:
-                pending = SiteCredentialRotation(rotation_id="rot_" + uuid4().hex,
-                                                 credential="vgs_" + secrets.token_urlsafe(32)).model_dump()
-                state["pending"] = pending
-                # Both credentials and the retry identity are committed in ONE OS
-                # credential entry before any request. No secret enters cloud.json.
-                self.secrets.set(self._secret_name(settings), json.dumps(state))
-            pending = state["pending"]
-            result = self._request(settings, "POST", f'/sites/{settings["site_id"]}/connection/renew',
-                                   state["active"], pending, response_type=SiteRotationResult)
-            if result["rotation_id"] != pending["rotation_id"] or result["state"] != "active":
-                raise CloudError("cloud_rotation_response_mismatch")
-            self.secrets.set(self._secret_name(settings), pending["credential"])
-            return result
+            return self._renew(settings)
+
+    def maintain(self, *, now, expected_identity=None):
+        """Recover an interrupted renewal and renew active keys within one day of expiry."""
+        settings = self._settings(expected_identity)
+        with self._lock(settings):
+            # Status proves which key the server currently accepts. A committed
+            # renewal with a lost reply is promoted without creating another one.
+            status = self._connection_request(settings, "GET", "")
+            if status["state"] != "active":
+                raise CloudError("cloud_connection_inactive")
+            if "pending" in self._secret_state(settings) or status["credential_expires_at"] <= now + 86400:
+                return self._renew(settings)
+            return status
+
+    def _renew(self, settings):
+        # Caller holds the connection lock through status, persistence and renewal.
+        state = self._secret_state(settings)
+        if "pending" not in state:
+            pending = SiteCredentialRotation(rotation_id="rot_" + uuid4().hex,
+                                             credential="vgs_" + secrets.token_urlsafe(32)).model_dump()
+            state["pending"] = pending
+            # Both credentials and the retry identity are committed in ONE OS
+            # credential entry before any request. No secret enters cloud.json.
+            self.secrets.set(self._secret_name(settings), json.dumps(state))
+        pending = state["pending"]
+        result = self._request(settings, "POST", f'/sites/{settings["site_id"]}/connection/renew',
+                               state["active"], pending, response_type=SiteRotationResult)
+        if result["rotation_id"] != pending["rotation_id"] or result["state"] != "active":
+            raise CloudError("cloud_rotation_response_mismatch")
+        self.secrets.set(self._secret_name(settings), pending["credential"])
+        return result
 
     def _connection_request(self, settings, method, suffix):
         state = self._secret_state(settings)
@@ -176,7 +193,7 @@ class CloudConnection:
         except Timeout:
             raise CloudError("connection_command_already_running") from None
 
-    def _settings(self):
+    def _settings(self, expected_identity=None):
         try:
             settings = json.loads(self.config.read_text(encoding="utf-8"))
             import re
@@ -186,9 +203,14 @@ class CloudConnection:
             if not re.fullmatch(r"ten_[a-z0-9]{8,64}", settings["tenant_id"]): raise ValueError()
             if not re.fullmatch(r"prj_[a-z0-9]{8,64}", settings["project_id"]): raise ValueError()
             if not re.fullmatch(r"sit_[a-f0-9]{32}", settings["site_id"]): raise ValueError()
-            return settings
         except (OSError, ValueError, TypeError, KeyError):
             raise CloudError("connection_config_unavailable") from None
+        # Check the same captured settings used for the actual request. An earlier
+        # caller-side check alone races with replacing the connection config.
+        identity = {k: settings[k] for k in ("endpoint", "tenant_id", "project_id", "site_id")}
+        if expected_identity is not None and identity != expected_identity:
+            raise CloudError("runtime_cloud_identity_changed")
+        return settings
 
     def _credential(self, settings):
         return self._secret_state(settings)["active"]

@@ -7,8 +7,10 @@ work runs. A vgpu.com account and Kubernetes are both optional.
 **Status: experimental.** The starter inspects this computer and existing local
 engines. Optional modules add an authenticated local console, background ComfyUI
 execution, outbound account commands, interruption exchange and Kubernetes/Kueue.
-The runtime passes controlled-engine/process/browser tests; real ComfyUI GPU
-qualification, browser pairing and production dashboard integration remain.
+The runtime passes controlled-engine/process/browser tests and one real ComfyUI
+image workflow on an RTX 4090, including a lost reply and runtime restart.
+Other GPU workflows, browser pairing and production dashboard integration remain
+to be qualified or built. See [runtime setup and evidence](docs/local-runtime.md).
 
 **Release timing:** public release is planned for when vgpu.com is ready. Current
 development stays local; no new packages, images or releases are published yet.
@@ -72,7 +74,8 @@ uv tool install --python 3.12 --reinstall '.[runtime]'
 uv tool install --python 3.12 --reinstall '.[kubernetes]'
 ```
 
-- `cloud`: scoped outbound enrollment and credential renewal; see
+- `cloud`: scoped outbound enrollment and credential renewal (automatic while the
+  connected runtime is running); see
   [cloud connection](docs/cloud-connection.md). Interactive browser login is pending.
 - `runtime`: detached local program, authenticated console and identified ComfyUI
   execution. Closing every browser does not cancel a job. See [runtime setup](docs/local-runtime.md).

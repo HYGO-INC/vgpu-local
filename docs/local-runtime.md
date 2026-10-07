@@ -56,8 +56,9 @@ The source-reviewed ComfyUI API is commit
 `b26625f23a888367b92153b28d93e159e83e677b` in
 [ComfyUI server.py](https://github.com/Comfy-Org/ComfyUI/blob/b26625f23a888367b92153b28d93e159e83e677b/server.py).
 Caller-chosen prompt IDs are **not** upstream idempotency keys. Other releases
-require qualification. Current tests use a controlled HTTP fixture matching
-these queue/history/create/cancel routes; they do not prove a real GPU render.
+require qualification. Automated tests use a controlled HTTP fixture matching
+these queue/history/create/cancel routes. A real GPU execution is also qualified
+below; it does not qualify every workflow or cancellation path.
 
 ## Optional account management
 
@@ -72,6 +73,14 @@ The runtime polls outward to the scoped `/connection/exchange` endpoint. No
 website-to-localhost connection, incoming firewall rule or Kubernetes cluster is
 required. Standalone mode makes no account requests. Connected mode retains the
 local console and continues local work during account/network failures.
+
+The running program checks its credential on startup and hourly, and renews it
+when one day or less remains. Lost renewal replies and restarts recover using the
+same durable key/rotation identity. Network failures back off to at most one retry
+per minute without stalling local work. An expired or revoked connection needs
+explicit enrollment again; it is never recreated automatically. A sleeping or
+stopped computer cannot renew a key, so an extended offline period can require
+reconnection. The server controls expiry; credentials stay in the OS store.
 
 Commands can start only an already approved recipe ID and content hash, or cancel
 an identified job. They bind tenant, project, site, execution, generation, expiry
@@ -108,3 +117,25 @@ uv run --locked --group browser python scripts/qualify-runtime-browser.py --chro
 This closes the entire browser during a fixture job, verifies the same result on
 reopen, and denies loopback permissions for a separate hosted-page fixture.
 Its report distinguishes that transport check from production website qualification.
+
+### Real ComfyUI render, 7 October 2026
+
+An isolated loopback ComfyUI 0.26.0 at source commit
+`b0ec19804ff68bfafb2729fe1c83e5f451a6061e`, using its existing embedded Python
+3.11.9 / PyTorch 2.6.0+cu124 environment, completed a FLUX.1-dev FP8 workflow on
+an RTX 4090 (24,564 MiB). The control program used its separate Python 3.12
+environment. No models or engine were installed by vgpu-local.
+
+The owner-approved core-node workflow generated one 512x512 image in eight Euler
+steps, with custom/API nodes disabled. Qualification dropped the actual engine's
+successful submission reply, closed all test-browser tabs, and killed/restarted
+the runtime while the engine was running. The same execution completed and its
+result appeared when Chrome 153.0.8010.48 reopened. A forwarding counter measured
+exactly one `/prompt` submission. Engine-reported execution was 19.26 seconds;
+22.047 seconds included browser/runtime orchestration. These are single-run
+measurements, not a performance benchmark.
+
+This qualifies one real image workflow and runtime recovery while ComfyUI stays
+alive. Long-video workflows, model checkpoint restoration after engine/OS failure,
+GPU-backed cancellation, other hardware/versions and production account UI remain
+separate qualifications. Model/output files stayed local.

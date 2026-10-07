@@ -1,5 +1,6 @@
 """Browser-independent reconciliation. All engine creates require a durable claim."""
 import asyncio
+import time
 from contextlib import suppress
 
 from .comfyui import EngineError
@@ -7,9 +8,16 @@ from .runtime_store import TERMINAL
 
 
 class Runtime:
-    def __init__(self, store, engine, *, cloud=None, cloud_identity=None, interval=1):
+    def __init__(self, store, engine, *, cloud=None, cloud_identity=None, interval=1,
+                 wall_clock=time.time, monotonic=time.monotonic):
         self.store, self.engine, self.cloud = store, engine, cloud
-        self.cloud_identity, self.interval = cloud_identity, interval
+        if cloud is not None and (cloud_identity is None or set(cloud_identity) !=
+                                  {"endpoint", "tenant_id", "project_id", "site_id"}):
+            raise ValueError("runtime_cloud_identity_required")
+        self.cloud_identity = dict(cloud_identity) if cloud_identity is not None else None
+        self.interval = interval
+        self.wall_clock, self.monotonic = wall_clock, monotonic
+        self.maintenance_after = 0
         self.cloud_state = "disabled" if cloud is None else "connecting"
         self.stopping = asyncio.Event()
 
@@ -35,29 +43,33 @@ class Runtime:
                                   error_code=str(error))
 
     def exchange(self):
-        # Enrollment/config changes cannot redirect an existing site's report outbox.
-        settings = self.cloud.settings()
-        if {k: settings[k] for k in self.cloud_identity} != self.cloud_identity:
-            raise ValueError("runtime_cloud_identity_changed")
+        if self.monotonic() >= self.maintenance_after:
+            self.cloud.maintain(now=self.wall_clock(), expected_identity=self.cloud_identity)
+            # A failed or interrupted renewal remains due. Restarts check promptly;
+            # wall-clock adjustments cannot suppress future maintenance checks.
+            self.maintenance_after = self.monotonic() + 3600
         batch = self.store.exchange_batch()
-        response = self.cloud.exchange(batch)
+        response = self.cloud.exchange(batch, expected_identity=self.cloud_identity)
         self.store.acknowledge(batch, response)
-        scope = {k: settings[k] for k in ("tenant_id", "project_id", "site_id")}
+        scope = {k: self.cloud_identity[k] for k in ("tenant_id", "project_id", "site_id")}
         for command in response["commands"]:
             self.store.accept(command, scope, origin="cloud")
         self.cloud_state = "connected"
 
     async def loop(self, action, *, cloud=False):
+        delay = self.interval
         while not self.stopping.is_set():
             if cloud:
                 try:
                     await asyncio.to_thread(action)
+                    delay = self.interval
                 except (RuntimeError, ValueError, OSError):
                     self.cloud_state = "unavailable"
+                    delay = min(max(delay * 2, 5), 60)
             else:
                 await asyncio.to_thread(action)
             with suppress(TimeoutError):
-                await asyncio.wait_for(self.stopping.wait(), self.interval)
+                await asyncio.wait_for(self.stopping.wait(), delay)
 
     async def run(self):
         # A cloud timeout must not stall local observation or execution.

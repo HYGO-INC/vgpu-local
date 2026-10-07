@@ -212,6 +212,7 @@ def test_outbound_outage_replay_and_scope_change_do_not_duplicate_work(tmp_path)
         if request.url.path.endswith("/sites"):
             record.update(json.loads(request.content)); return httpx.Response(201, json=connected(record))
         assert request.headers["authorization"] == "Bearer "+record["credential"]
+        if request.method == "GET": return httpx.Response(200, json=connected(record))
         batch = json.loads(request.content); exchanges.append(batch)
         if outage: raise httpx.ReadTimeout("lost reply")
         return httpx.Response(200, json={**SCOPE, "site_id": record["site_id"], "commands": [c],
@@ -236,4 +237,4 @@ def test_outbound_outage_replay_and_scope_change_do_not_duplicate_work(tmp_path)
         assert exchanges[-2]["reports"][0]["state"] == "succeeded"
         settings["site_id"] = "sit_"+"b"*32
         cloud.config.write_text(json.dumps(settings))
-        with pytest.raises(ValueError, match="identity_changed"): runtime.exchange()
+        with pytest.raises(CloudError, match="identity_changed"): runtime.exchange()

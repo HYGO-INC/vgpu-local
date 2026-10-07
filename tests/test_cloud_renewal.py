@@ -12,12 +12,15 @@ def setup_connection(tmp_path, *, lose_commit=False, lose_before=False, mismatch
     record = {}
     rotations = []
     calls = []
+    def status():
+        return {**connected(record), 'credential_expires_at': record.get('expires_at', 1800000000),
+                'state': record.get('state', 'active')}
     def server(request):
         nonlocal lose_commit, lose_before
         calls.append(request)
         if request.url.path.endswith('/sites'):
             record.update(json.loads(request.content))
-            return httpx.Response(201, json=connected(record))
+            return httpx.Response(201, json=status())
         if request.url.path.endswith('/renew'):
             body = json.loads(request.content)
             state = json.loads(next(iter(store.values.values())))
@@ -27,14 +30,22 @@ def setup_connection(tmp_path, *, lose_commit=False, lose_before=False, mismatch
                 lose_before = False
                 raise httpx.ConnectTimeout('private transport detail')
             record['credential'] = body['credential']
+            record['expires_at'] = 1800000000 + 30 * 86400
             if lose_commit:
                 lose_commit = False
                 raise httpx.ReadTimeout('private transport detail')
-            return httpx.Response(200, json={**connected(record), 'rotation_id':
+            return httpx.Response(200, json={**status(), 'rotation_id':
                 'rot_' + 'f' * 32 if mismatched_reply else body['rotation_id']})
         if request.headers['authorization'] != 'Bearer ' + record['credential']:
             return httpx.Response(401, json={'error': 'unauthorized'})
-        result = connected(record)
+        if request.url.path.endswith('/exchange'):
+            batch = json.loads(request.content)
+            return httpx.Response(200, json={
+                **{k: connected(record)[k] for k in ('tenant_id', 'project_id', 'site_id')}, 'commands': [],
+                'command_receipts': [r['command_id'] for r in batch['receipts']],
+                'report_receipts': [{k: r[k] for k in ('execution_id', 'revision')} for r in batch['reports']]
+            })
+        result = status()
         if request.url.path.endswith('/revoke'): result['state'] = 'revoked'
         return httpx.Response(200, json=result)
     transport = httpx.MockTransport(server)
