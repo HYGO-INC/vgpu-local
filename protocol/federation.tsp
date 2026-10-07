@@ -167,3 +167,26 @@ model LocalExchangeResult {
   @maxItems(20) command_receipts: LocalCommandId[];
   @maxItems(20) report_receipts: LocalReportReceipt[];
 }
+
+// OAuth itself follows RFC 8628. These two product operations accept only its
+// enrollment-scoped token, never an account session or a site's runtime key.
+model SiteEnrollmentApproval {
+  site_id: SiteId;
+  tenant_id: BackendIdentifier;
+  project_id: BackendIdentifier;
+  @minLength(1) @maxLength(120)
+  name: string;
+}
+
+@useAuth(BearerAuth)
+@route("/api/v1/device")
+interface DeviceEnrollment {
+  @get @route("/approval")
+  approval(): SiteEnrollmentApproval | FederationErrorResponse | {
+    @statusCode statusCode: 429; @body body: ProtocolError;
+  };
+  @post @route("/enroll")
+  enroll(@body enrollment: SiteEnrollment): {
+    @statusCode statusCode: 201; @body body: SiteConnection;
+  } | FederationErrorResponse | { @statusCode statusCode: 429; @body body: ProtocolError; };
+}

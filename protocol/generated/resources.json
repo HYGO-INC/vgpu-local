@@ -877,6 +877,36 @@
                 "not": {}
             }
         },
+        "SiteEnrollmentApproval": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "SiteEnrollmentApproval.json",
+            "type": "object",
+            "properties": {
+                "site_id": {
+                    "$ref": "SiteId.json"
+                },
+                "tenant_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "project_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                }
+            },
+            "required": [
+                "site_id",
+                "tenant_id",
+                "project_id",
+                "name"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
         "InterruptionScope": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "InterruptionScope.json",

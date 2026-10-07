@@ -14,7 +14,7 @@ import httpx
 from filelock import FileLock, Timeout
 
 from .cloud import CloudConnection, CloudError, endpoint_url
-from .contracts.models import SiteConnection, SiteEnrollment
+from .contracts.models import SiteConnection, SiteEnrollment, SiteEnrollmentApproval
 
 CLIENT = "vgpu-local"
 SCOPE = "vgpu:enroll"
@@ -141,6 +141,10 @@ class DeviceConnection:
             raise CloudError("device_enrollment_grant_expired_check_status")
         if "settings" not in state:
             status, approved = self._request(endpoint, "GET", "/api/v1/device/approval", token=state["access_token"])
+            try:
+                approved = SiteEnrollmentApproval.model_validate(approved).model_dump()
+            except ValueError:
+                raise CloudError("device_approval_scope_mismatch") from None
             if (status != 200 or approved.get("site_id") != state["site_id"] or approved.get("name") != name or
                 not re.fullmatch(r"ten_[a-z0-9]{8,64}", str(approved.get("tenant_id", ""))) or
                 not re.fullmatch(r"prj_[a-z0-9]{8,64}", str(approved.get("project_id", "")))):

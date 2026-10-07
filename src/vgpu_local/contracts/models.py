@@ -237,6 +237,16 @@ class SiteEnrollment(ContractModel):
     )
 
 
+class SiteEnrollmentApproval(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    site_id: str = Field(..., pattern='^sit_[a-f0-9]{32}(?![\\s\\S])')
+    tenant_id: str = Field(..., max_length=255, min_length=1)
+    project_id: str = Field(..., max_length=255, min_length=1)
+    name: str = Field(..., max_length=120, min_length=1)
+
+
 class SiteRotationResult(SiteConnection):
     model_config = ConfigDict(
         extra='forbid',

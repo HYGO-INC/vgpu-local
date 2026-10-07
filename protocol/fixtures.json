@@ -1521,5 +1521,53 @@
       ]
     },
     "path": "/site_id"
+  },
+  {
+    "name": "site-approval-scoped-metadata",
+    "contract": "SiteEnrollmentApproval",
+    "valid": true,
+    "document": {
+      "site_id": "sit_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "name": "Office"
+    }
+  },
+  {
+    "name": "site-approval-null-name",
+    "contract": "SiteEnrollmentApproval",
+    "valid": false,
+    "path": "/name",
+    "document": {
+      "site_id": "sit_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "name": null
+    }
+  },
+  {
+    "name": "site-approval-invalid-site",
+    "contract": "SiteEnrollmentApproval",
+    "valid": false,
+    "path": "/site_id",
+    "document": {
+      "site_id": "changed",
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "name": "Office"
+    }
+  },
+  {
+    "name": "site-approval-no-account-token",
+    "contract": "SiteEnrollmentApproval",
+    "valid": false,
+    "path": "/access_token",
+    "document": {
+      "site_id": "sit_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "name": "Office",
+      "access_token": "forbidden"
+    }
   }
 ]
