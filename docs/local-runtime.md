@@ -93,7 +93,10 @@ stopped computer cannot renew a key, so an extended offline period can require
 reconnection. The server controls expiry; credentials stay in the OS store.
 
 Commands can start only an already approved recipe ID and content hash, or cancel
-an identified job. They bind tenant, project, site, execution, generation, expiry
+an identified job. The connected runtime tells the account which recipes it may
+start: the first 100 approved recipes by ID, as ID, title and content hash only.
+It sends that list only when it differs from the copy the server reports holding.
+Commands bind tenant, project, site, execution, generation, expiry
 and retry identity. They cannot upload workflows, run arbitrary shell commands,
 rent GPUs or transfer output files. Durable receipts and minimal state reports
 replay after disconnection. The server must authorize every user command and

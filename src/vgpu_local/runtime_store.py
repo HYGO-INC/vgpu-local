@@ -5,7 +5,7 @@ import re
 import time
 from uuid import UUID, uuid4
 
-from .contracts.models import LocalExecutionCommand, LocalCommandReceipt, LocalExecutionReport
+from .contracts.models import LocalExecutionCommand, LocalCommandReceipt, LocalExecutionReport, LocalRecipe
 from .journal import Journal, fingerprint
 from .errors import KeyConflict
 
@@ -55,6 +55,11 @@ class RuntimeStore:
         with self.journal.connection() as db:
             return [{k: v for k, v in json.loads(row[0]).items() if k != "prompt"}
                     for row in db.execute("SELECT data FROM runtime_recipes ORDER BY id")]
+
+    def startable_recipes(self):
+        """What a connected account may start: the first 100 installed recipes by
+        recipe_id. Identity, title and digest only; workflows stay on this machine."""
+        return [LocalRecipe.model_validate(recipe).model_dump() for recipe in self.recipes()[:100]]
 
     def local_command(self, installation_id, action, recipe_id, *, execution_id=None):
         if action not in {"start", "cancel"}: raise ValueError("invalid_command_action")

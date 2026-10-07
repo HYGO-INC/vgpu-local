@@ -192,6 +192,22 @@ class LocalExecutionReport(ContractModel):
     )
 
 
+class LocalRecipe(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    recipe_id: str = Field(..., pattern='^[a-z][a-z0-9_-]{0,63}(?![\\s\\S])')
+    title: str = Field(..., max_length=120, min_length=1)
+    recipe_sha256: str = Field(..., pattern='^[a-f0-9]{64}(?![\\s\\S])')
+
+
+class LocalRecipeCatalog(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    items: list[LocalRecipe] = Field(..., max_length=100)
+
+
 class LocalReportReceipt(ContractModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -336,6 +352,7 @@ class LocalExchange(ContractModel):
     )
     receipts: list[LocalCommandReceipt] = Field(..., max_length=20)
     reports: list[LocalExecutionReport] = Field(..., max_length=20)
+    recipes: list[LocalRecipe] | MISSING = Field(MISSING, max_length=100)
 
 
 class LocalExchangeResult(ContractModel):
@@ -348,3 +365,4 @@ class LocalExchangeResult(ContractModel):
     commands: list[LocalExecutionCommand] = Field(..., max_length=20)
     command_receipts: list[LocalCommandId] = Field(..., max_length=20)
     report_receipts: list[LocalReportReceipt] = Field(..., max_length=20)
+    recipes_sha256: str | MISSING = Field(MISSING, pattern='^[a-f0-9]{64}(?![\\s\\S])')

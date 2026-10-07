@@ -91,5 +91,6 @@ lost. Responses and redirects cannot choose a different scope or forward tokens.
 HTTP is accepted only on numeric loopback addresses for integration tests.
 
 The optional [background runtime](local-runtime.md) exchanges authenticated recipe
-commands with the account API. The production website login/dashboard
-remain separate integration work. This connection does not provide cloud overflow.
+commands with the account API. So that the account can offer them, it also shares
+the ID, title and content hash of each approved recipe, never the workflow itself.
+This connection does not provide cloud overflow.

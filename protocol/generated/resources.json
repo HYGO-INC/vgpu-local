@@ -781,6 +781,52 @@
                 "not": {}
             }
         },
+        "LocalRecipeCatalog": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalRecipeCatalog.json",
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "LocalRecipe.json"
+                    },
+                    "maxItems": 100
+                }
+            },
+            "required": [
+                "items"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "LocalRecipe": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalRecipe.json",
+            "type": "object",
+            "properties": {
+                "recipe_id": {
+                    "$ref": "LocalRecipeId.json"
+                },
+                "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                },
+                "recipe_sha256": {
+                    "$ref": "LocalDigest.json"
+                }
+            },
+            "required": [
+                "recipe_id",
+                "title",
+                "recipe_sha256"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
         "LocalExchange": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "LocalExchange.json",
@@ -799,6 +845,13 @@
                         "$ref": "LocalExecutionReport.json"
                     },
                     "maxItems": 20
+                },
+                "recipes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "LocalRecipe.json"
+                    },
+                    "maxItems": 100
                 }
             },
             "required": [
@@ -843,6 +896,9 @@
                         "$ref": "LocalReportReceipt.json"
                     },
                     "maxItems": 20
+                },
+                "recipes_sha256": {
+                    "$ref": "LocalDigest.json"
                 }
             },
             "required": [

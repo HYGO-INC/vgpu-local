@@ -238,3 +238,50 @@ def test_outbound_outage_replay_and_scope_change_do_not_duplicate_work(tmp_path)
         settings["site_id"] = "sit_"+"b"*32
         cloud.config.write_text(json.dumps(settings))
         with pytest.raises(CloudError, match="identity_changed"): runtime.exchange()
+
+
+def test_connected_runtime_shares_its_recipe_catalog_only_when_it_changes(tmp_path, store):
+    secrets, record, exchanges, held = Secrets(), {}, [], {}
+    def wire(request):
+        if request.url.path.endswith("/sites"):
+            record.update(json.loads(request.content)); return httpx.Response(201, json=connected(record))
+        if request.method == "GET": return httpx.Response(200, json=connected(record))
+        batch = json.loads(request.content); exchanges.append(batch)
+        if "recipes" in batch: held["digest"] = fingerprint(batch["recipes"])
+        result = {**SCOPE, "site_id": record["site_id"], "commands": [], "command_receipts": [], "report_receipts": []}
+        return httpx.Response(200, json={**result, **({"recipes_sha256": held["digest"]} if held.get("digest") else {})})
+    cloud = CloudConnection(tmp_path / "cloud.json", secrets, transport=httpx.MockTransport(wire), lock_dir=tmp_path / "locks")
+    cloud.connect(endpoint="https://cloud.example", tenant_id=SCOPE["tenant_id"], project_id=SCOPE["project_id"],
+                  name="Office", user_access_token="user")
+    settings = cloud.settings()
+    runtime = Runtime(store, None, cloud=cloud,
+                      cloud_identity={k: settings[k] for k in ("endpoint", "tenant_id", "project_id", "site_id")})
+    runtime.exchange(); runtime.exchange()
+    assert exchanges[0]["recipes"] == [{"recipe_id": "fixture", "title": "Test workflow", "recipe_sha256": fingerprint(PROMPT)}]
+    assert "recipes" not in exchanges[1]
+    # Only identity, title and digest leave the machine, never the workflow.
+    assert all(json.dumps(node) not in json.dumps(exchanges[0]) for node in PROMPT.values())
+
+    store.install_recipe("another", "Second workflow", PROMPT)
+    runtime.exchange()
+    assert [recipe["recipe_id"] for recipe in exchanges[2]["recipes"]] == ["another", "fixture"]
+
+    # A service that lost its copy receives the catalog again on the next call.
+    held.clear()
+    runtime.exchange(); runtime.exchange(); runtime.exchange()
+    assert "recipes" not in exchanges[3] and "recipes" in exchanges[4] and "recipes" not in exchanges[5]
+
+    # A restarted runtime does not know the service's copy and sends it once.
+    restarted = Runtime(store, None, cloud=cloud, cloud_identity=runtime.cloud_identity)
+    restarted.exchange(); restarted.exchange()
+    assert "recipes" in exchanges[6] and "recipes" not in exchanges[7]
+
+
+def test_startable_catalog_is_the_first_hundred_recipes_by_id(store):
+    for number in range(105):
+        store.install_recipe(f"r{number:03d}", f"Recipe {number}", PROMPT)
+    catalog = store.startable_recipes()
+    assert len(catalog) == 100
+    assert [recipe["recipe_id"] for recipe in catalog] == sorted(recipe["recipe_id"] for recipe in catalog)
+    assert catalog[0]["recipe_id"] == "fixture" and catalog[-1]["recipe_id"] == "r098"
+    assert all(set(recipe) == {"recipe_id", "title", "recipe_sha256"} for recipe in catalog)

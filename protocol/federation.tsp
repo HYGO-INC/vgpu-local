@@ -95,6 +95,10 @@ interface SiteFederation {
   execution(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier,
     @path site_id: SiteId, @path execution_id: LocalExecutionId): LocalExecutionReport | FederationErrorResponse;
 
+  // The recipes the machine last reported as startable; empty before its first report.
+  @get @route("/{site_id}/recipes")
+  recipes(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier, @path site_id: SiteId): LocalRecipeCatalog | FederationErrorResponse;
+
   // The site credential is checked on every exchange, including result replay.
   @post @route("/{site_id}/connection/exchange")
   exchange(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier, @path site_id: SiteId,
@@ -149,9 +153,26 @@ model LocalExecutionReport {
   error_code?: string;
 }
 
+// An installed recipe that the connected account may start. Only its identity,
+// title and digest leave the machine; the workflow itself never does.
+model LocalRecipe {
+  recipe_id: LocalRecipeId;
+  @minLength(1) @maxLength(120)
+  title: string;
+  recipe_sha256: LocalDigest;
+}
+
+model LocalRecipeCatalog {
+  @maxItems(100) items: LocalRecipe[];
+}
+
 model LocalExchange {
   @maxItems(20) receipts: LocalCommandReceipt[];
   @maxItems(20) reports: LocalExecutionReport[];
+  // The startable catalog: the first 100 installed recipes in ascending
+  // recipe_id order. Sent only when its RFC 8785 SHA256 differs from the
+  // recipes_sha256 of the previous result.
+  @maxItems(100) recipes?: LocalRecipe[];
 }
 
 model LocalReportReceipt {
@@ -166,6 +187,8 @@ model LocalExchangeResult {
   @maxItems(20) commands: LocalExecutionCommand[];
   @maxItems(20) command_receipts: LocalCommandId[];
   @maxItems(20) report_receipts: LocalReportReceipt[];
+  // Digest of the catalog the service holds for this site; absent before any.
+  recipes_sha256?: LocalDigest;
 }
 
 // OAuth itself follows RFC 8628. These two product operations accept only its

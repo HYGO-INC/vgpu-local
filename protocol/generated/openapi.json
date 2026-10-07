@@ -1445,6 +1445,134 @@
         ]
       }
     },
+    "/api/v1/tenants/{tenant_id}/projects/{project_id}/sites/{site_id}/recipes": {
+      "get": {
+        "operationId": "SiteFederation_recipes",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BackendIdentifier"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BackendIdentifier"
+            }
+          },
+          {
+            "name": "site_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SiteId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalRecipeCatalog"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server could not understand the request due to invalid syntax.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access is unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The request conflicts with the current state of the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/tenants/{tenant_id}/projects/{project_id}/sites/{site_id}/revoke": {
       "post": {
         "operationId": "SiteFederation_revoke",
@@ -2419,6 +2547,13 @@
               "$ref": "#/components/schemas/LocalExecutionReport"
             },
             "maxItems": 20
+          },
+          "recipes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalRecipe"
+            },
+            "maxItems": 100
           }
         },
         "unevaluatedProperties": {
@@ -2465,6 +2600,9 @@
               "$ref": "#/components/schemas/LocalReportReceipt"
             },
             "maxItems": 20
+          },
+          "recipes_sha256": {
+            "$ref": "#/components/schemas/LocalDigest"
           }
         },
         "unevaluatedProperties": {
@@ -2576,6 +2714,48 @@
           "error_code": {
             "type": "string",
             "pattern": "^[a-z][a-z0-9_]{0,63}(?![\\s\\S])"
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "LocalRecipe": {
+        "type": "object",
+        "required": [
+          "recipe_id",
+          "title",
+          "recipe_sha256"
+        ],
+        "properties": {
+          "recipe_id": {
+            "$ref": "#/components/schemas/LocalRecipeId"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "recipe_sha256": {
+            "$ref": "#/components/schemas/LocalDigest"
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "LocalRecipeCatalog": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalRecipe"
+            },
+            "maxItems": 100
           }
         },
         "unevaluatedProperties": {

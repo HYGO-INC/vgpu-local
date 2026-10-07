@@ -4,6 +4,7 @@ import time
 from contextlib import suppress
 
 from .comfyui import EngineError
+from .journal import fingerprint
 from .runtime_store import TERMINAL
 
 
@@ -18,6 +19,8 @@ class Runtime:
         self.interval = interval
         self.wall_clock, self.monotonic = wall_clock, monotonic
         self.maintenance_after = 0
+        # Digest of the recipe catalog the service last reported holding.
+        self.hosted_recipes = None
         self.cloud_state = "disabled" if cloud is None else "connecting"
         self.stopping = asyncio.Event()
 
@@ -49,8 +52,14 @@ class Runtime:
             # wall-clock adjustments cannot suppress future maintenance checks.
             self.maintenance_after = self.monotonic() + 3600
         batch = self.store.exchange_batch()
+        # The catalog travels only when it differs from the service's copy, so a
+        # restarted runtime or a service that lost it converges on the next call.
+        catalog = self.store.startable_recipes()
+        if fingerprint(catalog) != self.hosted_recipes:
+            batch = dict(batch, recipes=catalog)
         response = self.cloud.exchange(batch, expected_identity=self.cloud_identity)
         self.store.acknowledge(batch, response)
+        self.hosted_recipes = response.get("recipes_sha256")
         scope = {k: self.cloud_identity[k] for k in ("tenant_id", "project_id", "site_id")}
         for command in response["commands"]:
             self.store.accept(command, scope, origin="cloud")

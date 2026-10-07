@@ -176,6 +176,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tenants/{tenant_id}/projects/{project_id}/sites/{site_id}/recipes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["SiteFederation_recipes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tenants/{tenant_id}/projects/{project_id}/sites/{site_id}/revoke": {
         parameters: {
             query?: never;
@@ -367,6 +383,7 @@ export interface components {
         LocalExchange: {
             receipts: components["schemas"]["LocalCommandReceipt"][];
             reports: components["schemas"]["LocalExecutionReport"][];
+            recipes?: components["schemas"]["LocalRecipe"][];
         };
         LocalExchangeResult: {
             tenant_id: components["schemas"]["BackendIdentifier"];
@@ -375,6 +392,7 @@ export interface components {
             commands: components["schemas"]["LocalExecutionCommand"][];
             command_receipts: components["schemas"]["LocalCommandId"][];
             report_receipts: components["schemas"]["LocalReportReceipt"][];
+            recipes_sha256?: components["schemas"]["LocalDigest"];
         };
         LocalExecutionCommand: {
             command_id: components["schemas"]["LocalCommandId"];
@@ -400,6 +418,14 @@ export interface components {
             recipe_id: components["schemas"]["LocalRecipeId"];
             recipe_sha256: components["schemas"]["LocalDigest"];
             error_code?: string;
+        };
+        LocalRecipe: {
+            recipe_id: components["schemas"]["LocalRecipeId"];
+            title: string;
+            recipe_sha256: components["schemas"]["LocalDigest"];
+        };
+        LocalRecipeCatalog: {
+            items: components["schemas"]["LocalRecipe"][];
         };
         LocalRecipeId: string;
         LocalReportReceipt: {
@@ -1471,6 +1497,102 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LocalExecutionReport"];
+                };
+            };
+            /** @description The server could not understand the request due to invalid syntax. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description Access is unauthorized. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description Access is forbidden. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description The server cannot find the requested resource. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description The request conflicts with the current state of the server. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description Client error */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description Client error */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProtocolError"];
+                };
+            };
+        };
+    };
+    SiteFederation_recipes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenant_id: components["schemas"]["BackendIdentifier"];
+                project_id: components["schemas"]["BackendIdentifier"];
+                site_id: components["schemas"]["SiteId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocalRecipeCatalog"];
                 };
             };
             /** @description The server could not understand the request due to invalid syntax. */
