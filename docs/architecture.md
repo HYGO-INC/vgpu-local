@@ -48,11 +48,13 @@ and result. Reconcile lost replies and agent restarts without blindly submitting
 again. An unobservable job remains uncertain; missing history does not prove it
 never ran. Only an explicit, authorized, job-specific request cancels work.
 
-The console, supervised agent and engine dispatch are targets, not implemented
-features. Qualification must close all browser sessions during an execution,
-reconnect to the same result, lose network/submission replies and restart the
-agent without causing duplicate execution. Browser tests must also deny public
-loopback permission and confirm connected mode needs no such request.
+The optional runtime now implements a detached control program, authenticated
+loopback console, durable ComfyUI submission/reconciliation and outbound command
+exchange. See [usage and qualification boundaries](local-runtime.md). Controlled
+HTTP and real-process tests cover lost replies, restart and cloud outage. A real
+Chrome qualification closes every test-browser process, then reopens the same
+completed job. Its hosted-page fixture denies loopback permissions; production
+website integration and actual GPU-engine qualification remain outstanding.
 
 ## Public boundary
 
@@ -71,7 +73,7 @@ credential is required. Protocol identifiers are not enabled capabilities.
 The local owner chooses permitted engines, GPU allocation, filesystem locations,
 workload recipes, availability and remote control. Pairing does not authorize
 arbitrary remote shell commands, data upload, spending or capacity contribution.
-Future commands must bind site, project, execution ID, revision, expiry and retry
+Commands bind site, project, execution ID, revision, expiry and retry
 identity; only explicitly installed/approved recipes may be remotely launched.
 The agent rejects replay, stale generations and mismatched scopes.
 
@@ -83,13 +85,14 @@ must not be exposed through an unrestricted web tunnel.
 
 ## Current implementation versus target
 
-Implemented: the dependency-free starter, optional outbound scoped enrollment and
+Implemented: the dependency-free starter, optional local console/background
+runtime, identified ComfyUI dispatch/reconciliation, outbound scoped commands and
+state reports, optional outbound scoped enrollment and
 recoverable renewal, interruption protocol and Linux file exchange, durable local
 receipt store, offline simulator and optional Kubernetes/Kueue execution/reclaim.
 
-Pending: browser/device login, authenticated continuous command transport,
-standalone job supervision and engine submission/recovery, minimal local console,
-signed installers/updater, measured optional-download manifest, multi-host
+Pending: browser/device login, production hosted dashboard integration,
+OS startup installation, signed installers/updater, measured optional-download manifest, multi-host
 standalone coordination and hardware qualification of cluster setup.
 
 Reuse upstream engines and schedulers. Do not implement a second generic GPU

@@ -10,6 +10,7 @@ import tomllib
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+CONSOLE = ("index.html", "app.js", "style.css")
 
 
 def check_archive(path: Path, root: Path = ROOT) -> dict:
@@ -26,6 +27,8 @@ def check_archive(path: Path, root: Path = ROOT) -> dict:
             files = {name: archive.read(name) for name in names}
         expected = {p.relative_to(root / "src").as_posix(): p.read_bytes()
                     for p in (root / "src/vgpu_local").rglob("*.py")}
+        for name in CONSOLE:
+            expected[f"vgpu_local/console/{name}"] = (root / "src/vgpu_local/console" / name).read_bytes()
         for name in ("LICENSE", "NOTICE"):
             expected[f"{prefix}.dist-info/licenses/{name}"] = (root / name).read_bytes()
         generated = {f"{prefix}.dist-info/{name}" for name in ("METADATA", "WHEEL", "entry_points.txt", "RECORD")}
@@ -41,6 +44,8 @@ def check_archive(path: Path, root: Path = ROOT) -> dict:
             files = {m.name: archive.extractfile(m).read() for m in members}
         expected = {f"{prefix}/" + p.relative_to(root).as_posix(): p.read_bytes()
                     for p in (root / "src/vgpu_local").rglob("*.py")}
+        for name in CONSOLE:
+            expected[f"{prefix}/src/vgpu_local/console/{name}"] = (root / "src/vgpu_local/console" / name).read_bytes()
         for name in ("pyproject.toml", "README.md", "LICENSE", "NOTICE", ".gitignore"):
             expected[f"{prefix}/{name}"] = (root / name).read_bytes()
         generated = {f"{prefix}/PKG-INFO"}
@@ -63,7 +68,7 @@ def check_archive(path: Path, root: Path = ROOT) -> dict:
     if metadata["Name"] != "vgpu-local" or metadata["Version"] != version:
         raise ValueError("package_identity_mismatch")
     if project.get("dependencies", []) or any(
-        not re.fullmatch(r".+; extra == ['\"](?:cloud|control|kubernetes)['\"]", dependency)
+        not re.fullmatch(r".+; extra == ['\"](?:cloud|control|kubernetes|runtime)['\"]", dependency)
         for dependency in metadata.get_all("Requires-Dist", [])
     ):
         raise ValueError("mandatory_or_unrecognized_runtime_dependency")

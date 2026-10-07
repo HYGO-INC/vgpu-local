@@ -5,9 +5,10 @@ or in a private cloud. Optional vgpu.com management does not change where the
 work runs. A vgpu.com account and Kubernetes are both optional.
 
 **Status: experimental.** The starter inspects this computer and existing local
-engines. Optional modules support account enrollment, interruption exchange and
-Kubernetes/Kueue execution. Browser pairing, the local console and managed job
-dispatch to a standalone computer are still being built.
+engines. Optional modules add an authenticated local console, background ComfyUI
+execution, outbound account commands, interruption exchange and Kubernetes/Kueue.
+The runtime passes controlled-engine/process/browser tests; real ComfyUI GPU
+qualification, browser pairing and production dashboard integration remain.
 
 **Release timing:** public release is planned for when vgpu.com is ready. Current
 development stays local; no new packages, images or releases are published yet.
@@ -53,10 +54,10 @@ downloads are planned, not already distributed.
 
 | Mode | Management | Work runs on | Kubernetes |
 |---|---|---|---|
-| Standalone | Local CLI; local console planned | Your GPUs | Optional |
-| Connected | vgpu.com account/dashboard; dispatch integration planned | Your GPUs | Optional |
+| Standalone | Local CLI and loopback console | Your GPUs | Optional |
+| Connected | Outbound command API; production dashboard integration pending | Your GPUs | Optional |
 
-Connecting never enables paid rentals, data export or renting your GPUs to others.
+Connecting never enables paid rentals, output uploads or renting your GPUs to others.
 Standalone mode does not require the hosted platform's account, billing,
 database or orchestration services. See [architecture](docs/architecture.md).
 
@@ -65,12 +66,16 @@ Install extras only for features you choose:
 ```sh
 # From the checkout; retain already chosen extras when changing this selection.
 uv tool install --python 3.12 --reinstall '.[cloud]'
+# Optional local console; use '.[runtime,cloud]' to also manage it through an account.
+uv tool install --python 3.12 --reinstall '.[runtime]'
 # Existing cluster support; optionally combined as '.[cloud,kubernetes]'.
 uv tool install --python 3.12 --reinstall '.[kubernetes]'
 ```
 
 - `cloud`: scoped outbound enrollment and credential renewal; see
   [cloud connection](docs/cloud-connection.md). Interactive browser login is pending.
+- `runtime`: detached local program, authenticated console and identified ComfyUI
+  execution. Closing every browser does not cancel a job. See [runtime setup](docs/local-runtime.md).
 - `control`: durable interruption notices and acknowledgements; see
   [interruption exchange](docs/interruptions.md).
 - `kubernetes`: existing Kubernetes/Kueue integration. It installs the Python

@@ -11,6 +11,14 @@ def main():
     # registration must not import their implementations until requested.
     import sys
     selected = sys.argv[1:2]
+    if selected == ["runtime"]:
+        try:
+            from .runtime_cli import register as register_runtime
+        except ModuleNotFoundError:
+            parser.exit(2, "Install the optional vgpu-local[runtime] extra for runtime commands.\n")
+        register_runtime(commands)
+    else:
+        commands.add_parser("runtime", help="Optional background runtime and local console")
     if selected == ["interruption"]:
         try:
             from .interruption_cli import register
@@ -62,6 +70,9 @@ def main():
         if args.action in {"doctor", "engine"}:
             from .starter import run
             result = run(args)
+        elif args.action == "runtime":
+            from .runtime_cli import run
+            result = run(args)
         elif args.action == "interruption":
             from .interruption_cli import run
             result = run(args)
@@ -110,7 +121,7 @@ def main():
                 return
         print(json.dumps(result, indent=2))
     except ModuleNotFoundError:
-        extra = "cloud" if args.action == "cloud" else "control"
+        extra = args.action if args.action in {"cloud", "runtime"} else "control"
         parser.exit(2, f"Install the optional vgpu-local[{extra}] extra for this command.\n")
     except (ValueError, OSError, subprocess.SubprocessError, RuntimeError) as error:
         parser.exit(2, str(error) + "\n")

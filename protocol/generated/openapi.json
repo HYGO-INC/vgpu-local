@@ -136,6 +136,280 @@
         ]
       }
     },
+    "/api/v1/tenants/{tenant_id}/projects/{project_id}/sites/{site_id}/commands": {
+      "post": {
+        "operationId": "SiteFederation_command",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BackendIdentifier"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BackendIdentifier"
+            }
+          },
+          {
+            "name": "site_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SiteId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalExecutionCommand"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server could not understand the request due to invalid syntax.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access is unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The request conflicts with the current state of the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalExecutionCommand"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/projects/{project_id}/sites/{site_id}/commands/{command_id}": {
+      "get": {
+        "operationId": "SiteFederation_commandStatus",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BackendIdentifier"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BackendIdentifier"
+            }
+          },
+          {
+            "name": "site_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SiteId"
+            }
+          },
+          {
+            "name": "command_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LocalCommandId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalCommandStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server could not understand the request due to invalid syntax.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access is unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The request conflicts with the current state of the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/tenants/{tenant_id}/projects/{project_id}/sites/{site_id}/connection": {
       "get": {
         "operationId": "SiteFederation_connection",
@@ -253,6 +527,144 @@
                 "schema": {
                   "$ref": "#/components/schemas/ProtocolError"
                 }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/projects/{project_id}/sites/{site_id}/connection/exchange": {
+      "post": {
+        "operationId": "SiteFederation_exchange",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BackendIdentifier"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BackendIdentifier"
+            }
+          },
+          {
+            "name": "site_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SiteId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalExchangeResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server could not understand the request due to invalid syntax.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access is unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The request conflicts with the current state of the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalExchange"
               }
             }
           }
@@ -438,6 +850,273 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SiteConnection"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server could not understand the request due to invalid syntax.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access is unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The request conflicts with the current state of the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/projects/{project_id}/sites/{site_id}/executions": {
+      "get": {
+        "operationId": "SiteFederation_executions",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BackendIdentifier"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BackendIdentifier"
+            }
+          },
+          {
+            "name": "site_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SiteId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LocalExecutionReport"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server could not understand the request due to invalid syntax.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Access is unauthorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access is forbidden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The request conflicts with the current state of the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProtocolError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tenants/{tenant_id}/projects/{project_id}/sites/{site_id}/executions/{execution_id}": {
+      "get": {
+        "operationId": "SiteFederation_execution",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BackendIdentifier"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BackendIdentifier"
+            }
+          },
+          {
+            "name": "site_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SiteId"
+            }
+          },
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LocalExecutionId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalExecutionReport"
                 }
               }
             }
@@ -1427,6 +2106,262 @@
                 "type": "null"
               }
             ]
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "LocalCommandId": {
+        "type": "string",
+        "pattern": "^cmd_[a-f0-9]{32}(?![\\s\\S])"
+      },
+      "LocalCommandReceipt": {
+        "type": "object",
+        "required": [
+          "command_id",
+          "request_sha256",
+          "accepted"
+        ],
+        "properties": {
+          "command_id": {
+            "$ref": "#/components/schemas/LocalCommandId"
+          },
+          "request_sha256": {
+            "$ref": "#/components/schemas/LocalDigest"
+          },
+          "accepted": {
+            "type": "boolean"
+          },
+          "error_code": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}(?![\\s\\S])"
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "LocalCommandStatus": {
+        "type": "object",
+        "required": [
+          "command"
+        ],
+        "properties": {
+          "command": {
+            "$ref": "#/components/schemas/LocalExecutionCommand"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/LocalCommandReceipt"
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "LocalDigest": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}(?![\\s\\S])"
+      },
+      "LocalExchange": {
+        "type": "object",
+        "required": [
+          "receipts",
+          "reports"
+        ],
+        "properties": {
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalCommandReceipt"
+            },
+            "maxItems": 20
+          },
+          "reports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalExecutionReport"
+            },
+            "maxItems": 20
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "LocalExchangeResult": {
+        "type": "object",
+        "required": [
+          "tenant_id",
+          "project_id",
+          "site_id",
+          "commands",
+          "command_receipts",
+          "report_receipts"
+        ],
+        "properties": {
+          "tenant_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "project_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/SiteId"
+          },
+          "commands": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalExecutionCommand"
+            },
+            "maxItems": 20
+          },
+          "command_receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalCommandId"
+            },
+            "maxItems": 20
+          },
+          "report_receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalReportReceipt"
+            },
+            "maxItems": 20
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "LocalExecutionCommand": {
+        "type": "object",
+        "required": [
+          "command_id",
+          "tenant_id",
+          "project_id",
+          "site_id",
+          "execution_id",
+          "generation",
+          "expires_at",
+          "action",
+          "recipe_id",
+          "recipe_sha256",
+          "request_sha256"
+        ],
+        "properties": {
+          "command_id": {
+            "$ref": "#/components/schemas/LocalCommandId"
+          },
+          "tenant_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "project_id": {
+            "$ref": "#/components/schemas/BackendIdentifier"
+          },
+          "site_id": {
+            "$ref": "#/components/schemas/SiteId"
+          },
+          "execution_id": {
+            "$ref": "#/components/schemas/LocalExecutionId"
+          },
+          "generation": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "expires_at": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "start",
+              "cancel"
+            ]
+          },
+          "recipe_id": {
+            "$ref": "#/components/schemas/LocalRecipeId"
+          },
+          "recipe_sha256": {
+            "$ref": "#/components/schemas/LocalDigest"
+          },
+          "request_sha256": {
+            "$ref": "#/components/schemas/LocalDigest"
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "LocalExecutionId": {
+        "type": "string",
+        "pattern": "^lex_[a-f0-9]{32}(?![\\s\\S])"
+      },
+      "LocalExecutionReport": {
+        "type": "object",
+        "required": [
+          "execution_id",
+          "revision",
+          "generation",
+          "state",
+          "recipe_id",
+          "recipe_sha256"
+        ],
+        "properties": {
+          "execution_id": {
+            "$ref": "#/components/schemas/LocalExecutionId"
+          },
+          "revision": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "generation": {
+            "$ref": "#/components/schemas/PositiveInteger"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "dispatching",
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "uncertain",
+              "cancel_requested",
+              "canceled"
+            ]
+          },
+          "recipe_id": {
+            "$ref": "#/components/schemas/LocalRecipeId"
+          },
+          "recipe_sha256": {
+            "$ref": "#/components/schemas/LocalDigest"
+          },
+          "error_code": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}(?![\\s\\S])"
+          }
+        },
+        "unevaluatedProperties": {
+          "not": {}
+        }
+      },
+      "LocalRecipeId": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_-]{0,63}(?![\\s\\S])"
+      },
+      "LocalReportReceipt": {
+        "type": "object",
+        "required": [
+          "execution_id",
+          "revision"
+        ],
+        "properties": {
+          "execution_id": {
+            "$ref": "#/components/schemas/LocalExecutionId"
+          },
+          "revision": {
+            "$ref": "#/components/schemas/PositiveInteger"
           }
         },
         "unevaluatedProperties": {

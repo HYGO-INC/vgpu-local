@@ -13,6 +13,7 @@ vgpu-local = "vgpu_local.cli:main"
 control = ["pydantic==2.13.5", "rfc8785==0.1.4", "filelock==4.0.12"]
 cloud = ["vgpu-local[control]", "httpx==0.28.1", "keyring==25.7.0"]
 kubernetes = ["vgpu-local[control]", "kubernetes==35.0.0"]
+runtime = ["vgpu-local[control]", "httpx==0.28.1", "starlette==1.7.0", "uvicorn==0.54.0"]
 
 [build-system]
 requires = ["hatchling>=1.27,<2"]
@@ -21,7 +22,8 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = ["pytest==8.4.2", "datamodel-code-generator[black,isort]==0.83.0",
        "jsonschema==4.26.0", "rfc8785==0.1.4", "filelock==4.0.12",
-       "httpx==0.28.1", "keyring==25.7.0"]
+       "httpx==0.28.1", "keyring==25.7.0", "starlette==1.7.0", "uvicorn==0.54.0"]
+browser = ["playwright==1.63.0"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

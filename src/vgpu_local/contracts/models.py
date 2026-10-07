@@ -20,6 +20,11 @@ class BackendWorkloadStatus(ContractModel):
     state: Literal['queued', 'running', 'succeeded', 'failed', 'canceled', 'unknown']
 
 
+type LocalCommandId = Annotated[
+    str, Field(..., pattern='^cmd_[a-f0-9]{32}(?![\\s\\S])')
+]
+
+
 type NonnegativeInteger = Annotated[int, Field(..., ge=0, le=9007199254740991)]
 
 
@@ -129,6 +134,70 @@ class InterruptionSourceNotice(ContractModel):
         ..., max_length=3
     )
     extension_limit_ms: NonnegativeInteger | None
+
+
+class LocalCommandReceipt(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+        regex_engine="python-re",
+    )
+    command_id: str = Field(..., pattern='^cmd_[a-f0-9]{32}(?![\\s\\S])')
+    request_sha256: str = Field(..., pattern='^[a-f0-9]{64}(?![\\s\\S])')
+    accepted: bool
+    error_code: str | MISSING = Field(
+        MISSING, pattern='^[a-z][a-z0-9_]{0,63}(?![\\s\\S])'
+    )
+
+
+class LocalExecutionCommand(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    command_id: str = Field(..., pattern='^cmd_[a-f0-9]{32}(?![\\s\\S])')
+    tenant_id: str = Field(..., max_length=255, min_length=1)
+    project_id: str = Field(..., max_length=255, min_length=1)
+    site_id: str = Field(..., pattern='^sit_[a-f0-9]{32}(?![\\s\\S])')
+    execution_id: str = Field(..., pattern='^lex_[a-f0-9]{32}(?![\\s\\S])')
+    generation: int = Field(..., ge=1, le=9007199254740991)
+    expires_at: int = Field(..., ge=1, le=9007199254740991)
+    action: Literal['start', 'cancel']
+    recipe_id: str = Field(..., pattern='^[a-z][a-z0-9_-]{0,63}(?![\\s\\S])')
+    recipe_sha256: str = Field(..., pattern='^[a-f0-9]{64}(?![\\s\\S])')
+    request_sha256: str = Field(..., pattern='^[a-f0-9]{64}(?![\\s\\S])')
+
+
+class LocalExecutionReport(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+        regex_engine="python-re",
+    )
+    execution_id: str = Field(..., pattern='^lex_[a-f0-9]{32}(?![\\s\\S])')
+    revision: int = Field(..., ge=1, le=9007199254740991)
+    generation: int = Field(..., ge=1, le=9007199254740991)
+    state: Literal[
+        'accepted',
+        'dispatching',
+        'queued',
+        'running',
+        'succeeded',
+        'failed',
+        'uncertain',
+        'cancel_requested',
+        'canceled',
+    ]
+    recipe_id: str = Field(..., pattern='^[a-z][a-z0-9_-]{0,63}(?![\\s\\S])')
+    recipe_sha256: str = Field(..., pattern='^[a-f0-9]{64}(?![\\s\\S])')
+    error_code: str | MISSING = Field(
+        MISSING, pattern='^[a-z][a-z0-9_]{0,63}(?![\\s\\S])'
+    )
+
+
+class LocalReportReceipt(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    execution_id: str = Field(..., pattern='^lex_[a-f0-9]{32}(?![\\s\\S])')
+    revision: int = Field(..., ge=1, le=9007199254740991)
 
 
 class SiteConnection(ContractModel):
@@ -241,3 +310,31 @@ class InterruptionSnapshot(InterruptionScope):
     schema_version: Literal[1]
     cursor: int = Field(..., ge=0, le=9007199254740991)
     interruptions: list[Interruption] = Field(..., max_length=128)
+
+
+class LocalCommandStatus(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    command: LocalExecutionCommand
+    receipt: LocalCommandReceipt | MISSING = MISSING
+
+
+class LocalExchange(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    receipts: list[LocalCommandReceipt] = Field(..., max_length=20)
+    reports: list[LocalExecutionReport] = Field(..., max_length=20)
+
+
+class LocalExchangeResult(ContractModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    tenant_id: str = Field(..., max_length=255, min_length=1)
+    project_id: str = Field(..., max_length=255, min_length=1)
+    site_id: str = Field(..., pattern='^sit_[a-f0-9]{32}(?![\\s\\S])')
+    commands: list[LocalExecutionCommand] = Field(..., max_length=20)
+    command_receipts: list[LocalCommandId] = Field(..., max_length=20)
+    report_receipts: list[LocalReportReceipt] = Field(..., max_length=20)

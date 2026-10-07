@@ -13,7 +13,8 @@ from uuid import uuid4
 import httpx
 from filelock import FileLock, Timeout
 
-from .contracts.models import SiteConnection, SiteEnrollment, SiteCredentialRotation, SiteRotationResult
+from .contracts.models import (SiteConnection, SiteEnrollment, SiteCredentialRotation, SiteRotationResult,
+                               LocalExchange, LocalExchangeResult)
 
 
 class CloudError(RuntimeError):
@@ -109,6 +110,19 @@ class CloudConnection:
         with self._lock(settings):
             return self._connection_request(settings, "GET", "")
 
+    def settings(self):
+        """Non-secret enrollment identity for explicitly enabling hosted management."""
+        return self._settings()
+
+    def exchange(self, batch):
+        settings = self._settings()
+        body = LocalExchange.model_validate(batch).model_dump()
+        with self._lock(settings):
+            if "pending" in self._secret_state(settings):
+                self._connection_request(settings, "GET", "")
+            return self._request(settings, "POST", f'/sites/{settings["site_id"]}/connection/exchange',
+                                 self._credential(settings), body, response_type=LocalExchangeResult)
+
     def disconnect(self):
         settings = self._settings()
         # Keep the credential and metadata for safe retry if the response is lost.
@@ -203,7 +217,12 @@ class CloudConnection:
         url = f'{base}/api/v1/tenants/{settings["tenant_id"]}/projects/{settings["project_id"]}{suffix}'
         try:
             with httpx.Client(transport=self.transport, timeout=20, follow_redirects=False, trust_env=False) as client:
-                response = client.request(method, url, headers={"Authorization": f"Bearer {token}"}, json=body)
+                with client.stream(method, url, headers={"Authorization": f"Bearer {token}"}, json=body) as stream:
+                    data = bytearray()
+                    for chunk in stream.iter_bytes():
+                        data.extend(chunk)
+                        if len(data) > 262144: raise CloudError("cloud_response_too_large")
+                    response = httpx.Response(stream.status_code, content=bytes(data))
         except httpx.HTTPError:
             raise CloudError("cloud_outcome_unknown_retry_same_connection") from None
         if response.status_code in {401, 403}:
@@ -216,6 +235,7 @@ class CloudConnection:
             result = response_type.model_validate(response.json())
         except ValueError:
             raise CloudError("invalid_cloud_response") from None
-        if any(getattr(result, key) != settings[key] for key in ("tenant_id", "project_id", "site_id", "name")):
+        keys = ("tenant_id", "project_id", "site_id") if response_type is LocalExchangeResult else ("tenant_id", "project_id", "site_id", "name")
+        if any(getattr(result, key) != settings[key] for key in keys):
             raise CloudError("cloud_response_scope_mismatch")
         return result.model_dump()

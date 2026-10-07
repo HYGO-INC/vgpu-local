@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>vGPU Local</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body><main><header><span class="brand">vGPU <b>Local</b></span><span id="connection">Connecting…</span></header>
+<h1>Your GPU. Your workspace.</h1><p>Jobs keep running when you close this page. Models and results stay on this computer.</p>
+<section aria-labelledby="workflows"><h2 id="workflows">Run a workflow</h2>
+<p>Choose a workflow you have installed and approved on this computer.</p>
+<label for="recipe">Workflow</label><select id="recipe"></select><button id="start" disabled>Start job</button>
+<button id="retry" hidden>Retry pending request</button><p id="message" role="status"></p></section>
+<section aria-labelledby="jobs-title"><h2 id="jobs-title">Jobs</h2><div id="jobs" aria-live="polite"></div></section>
+<footer>Local control · No Kubernetes required</footer></main></body></html>

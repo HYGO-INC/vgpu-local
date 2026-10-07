@@ -568,6 +568,315 @@
                 "not": {}
             }
         },
+        "LocalExecutionCommand": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalExecutionCommand.json",
+            "type": "object",
+            "properties": {
+                "command_id": {
+                    "$ref": "LocalCommandId.json"
+                },
+                "tenant_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "project_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "site_id": {
+                    "$ref": "SiteId.json"
+                },
+                "execution_id": {
+                    "$ref": "LocalExecutionId.json"
+                },
+                "generation": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "expires_at": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "action": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "start"
+                        },
+                        {
+                            "type": "string",
+                            "const": "cancel"
+                        }
+                    ]
+                },
+                "recipe_id": {
+                    "$ref": "LocalRecipeId.json"
+                },
+                "recipe_sha256": {
+                    "$ref": "LocalDigest.json"
+                },
+                "request_sha256": {
+                    "$ref": "LocalDigest.json"
+                }
+            },
+            "required": [
+                "command_id",
+                "tenant_id",
+                "project_id",
+                "site_id",
+                "execution_id",
+                "generation",
+                "expires_at",
+                "action",
+                "recipe_id",
+                "recipe_sha256",
+                "request_sha256"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "LocalCommandId": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalCommandId.json",
+            "type": "string",
+            "pattern": "^cmd_[a-f0-9]{32}(?![\\s\\S])"
+        },
+        "LocalExecutionId": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalExecutionId.json",
+            "type": "string",
+            "pattern": "^lex_[a-f0-9]{32}(?![\\s\\S])"
+        },
+        "LocalRecipeId": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalRecipeId.json",
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,63}(?![\\s\\S])"
+        },
+        "LocalDigest": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalDigest.json",
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}(?![\\s\\S])"
+        },
+        "LocalCommandStatus": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalCommandStatus.json",
+            "type": "object",
+            "properties": {
+                "command": {
+                    "$ref": "LocalExecutionCommand.json"
+                },
+                "receipt": {
+                    "$ref": "LocalCommandReceipt.json"
+                }
+            },
+            "required": [
+                "command"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "LocalCommandReceipt": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalCommandReceipt.json",
+            "type": "object",
+            "properties": {
+                "command_id": {
+                    "$ref": "LocalCommandId.json"
+                },
+                "request_sha256": {
+                    "$ref": "LocalDigest.json"
+                },
+                "accepted": {
+                    "type": "boolean"
+                },
+                "error_code": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]{0,63}(?![\\s\\S])"
+                }
+            },
+            "required": [
+                "command_id",
+                "request_sha256",
+                "accepted"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "LocalExecutionReport": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalExecutionReport.json",
+            "type": "object",
+            "properties": {
+                "execution_id": {
+                    "$ref": "LocalExecutionId.json"
+                },
+                "revision": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "generation": {
+                    "$ref": "PositiveInteger.json"
+                },
+                "state": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "accepted"
+                        },
+                        {
+                            "type": "string",
+                            "const": "dispatching"
+                        },
+                        {
+                            "type": "string",
+                            "const": "queued"
+                        },
+                        {
+                            "type": "string",
+                            "const": "running"
+                        },
+                        {
+                            "type": "string",
+                            "const": "succeeded"
+                        },
+                        {
+                            "type": "string",
+                            "const": "failed"
+                        },
+                        {
+                            "type": "string",
+                            "const": "uncertain"
+                        },
+                        {
+                            "type": "string",
+                            "const": "cancel_requested"
+                        },
+                        {
+                            "type": "string",
+                            "const": "canceled"
+                        }
+                    ]
+                },
+                "recipe_id": {
+                    "$ref": "LocalRecipeId.json"
+                },
+                "recipe_sha256": {
+                    "$ref": "LocalDigest.json"
+                },
+                "error_code": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]{0,63}(?![\\s\\S])"
+                }
+            },
+            "required": [
+                "execution_id",
+                "revision",
+                "generation",
+                "state",
+                "recipe_id",
+                "recipe_sha256"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "LocalExchange": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalExchange.json",
+            "type": "object",
+            "properties": {
+                "receipts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "LocalCommandReceipt.json"
+                    },
+                    "maxItems": 20
+                },
+                "reports": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "LocalExecutionReport.json"
+                    },
+                    "maxItems": 20
+                }
+            },
+            "required": [
+                "receipts",
+                "reports"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "LocalExchangeResult": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalExchangeResult.json",
+            "type": "object",
+            "properties": {
+                "tenant_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "project_id": {
+                    "$ref": "BackendIdentifier.json"
+                },
+                "site_id": {
+                    "$ref": "SiteId.json"
+                },
+                "commands": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "LocalExecutionCommand.json"
+                    },
+                    "maxItems": 20
+                },
+                "command_receipts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "LocalCommandId.json"
+                    },
+                    "maxItems": 20
+                },
+                "report_receipts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "LocalReportReceipt.json"
+                    },
+                    "maxItems": 20
+                }
+            },
+            "required": [
+                "tenant_id",
+                "project_id",
+                "site_id",
+                "commands",
+                "command_receipts",
+                "report_receipts"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
+        "LocalReportReceipt": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$id": "LocalReportReceipt.json",
+            "type": "object",
+            "properties": {
+                "execution_id": {
+                    "$ref": "LocalExecutionId.json"
+                },
+                "revision": {
+                    "$ref": "PositiveInteger.json"
+                }
+            },
+            "required": [
+                "execution_id",
+                "revision"
+            ],
+            "unevaluatedProperties": {
+                "not": {}
+            }
+        },
         "InterruptionScope": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "$id": "InterruptionScope.json",

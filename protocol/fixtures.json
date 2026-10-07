@@ -1100,5 +1100,344 @@
       "supplier_state": "allocated",
       "workload": null
     }
+  },
+  {
+    "name": "local-command-scoped-recipe",
+    "contract": "LocalExecutionCommand",
+    "valid": true,
+    "document": {
+      "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "site_id": "sit_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+      "generation": 1,
+      "expires_at": 1800000000,
+      "action": "start",
+      "recipe_id": "video",
+      "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29"
+    }
+  },
+  {
+    "name": "local-command-no-shell",
+    "contract": "LocalExecutionCommand",
+    "valid": false,
+    "document": {
+      "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "site_id": "sit_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+      "generation": 1,
+      "expires_at": 1800000000,
+      "action": "start",
+      "recipe_id": "video",
+      "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+      "shell": "not-permitted"
+    }
+  },
+  {
+    "name": "local-command-no-expiry-null",
+    "contract": "LocalExecutionCommand",
+    "valid": false,
+    "document": {
+      "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "site_id": "sit_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+      "generation": 1,
+      "expires_at": null,
+      "action": "start",
+      "recipe_id": "video",
+      "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29"
+    }
+  },
+  {
+    "name": "local-command-generation-positive",
+    "contract": "LocalExecutionCommand",
+    "valid": false,
+    "document": {
+      "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "site_id": "sit_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+      "generation": 0,
+      "expires_at": 1800000000,
+      "action": "start",
+      "recipe_id": "video",
+      "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29"
+    }
+  },
+  {
+    "name": "local-receipt",
+    "contract": "LocalCommandReceipt",
+    "valid": true,
+    "document": {
+      "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+      "accepted": true
+    }
+  },
+  {
+    "name": "local-receipt-no-null-error",
+    "contract": "LocalCommandReceipt",
+    "valid": false,
+    "document": {
+      "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+      "accepted": true,
+      "error_code": null
+    }
+  },
+  {
+    "name": "local-command-status-pending",
+    "contract": "LocalCommandStatus",
+    "valid": true,
+    "document": {
+      "command": {
+        "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "tenant_id": "ten_example0",
+        "project_id": "prj_example0",
+        "site_id": "sit_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+        "generation": 1,
+        "expires_at": 1800000000,
+        "action": "start",
+        "recipe_id": "video",
+        "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29"
+      }
+    }
+  },
+  {
+    "name": "local-command-status-received",
+    "contract": "LocalCommandStatus",
+    "valid": true,
+    "document": {
+      "command": {
+        "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "tenant_id": "ten_example0",
+        "project_id": "prj_example0",
+        "site_id": "sit_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+        "generation": 1,
+        "expires_at": 1800000000,
+        "action": "start",
+        "recipe_id": "video",
+        "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29"
+      },
+      "receipt": {
+        "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+        "accepted": true
+      }
+    }
+  },
+  {
+    "name": "local-report-minimal",
+    "contract": "LocalExecutionReport",
+    "valid": true,
+    "document": {
+      "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+      "revision": 1,
+      "generation": 1,
+      "state": "accepted",
+      "recipe_id": "video",
+      "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    }
+  },
+  {
+    "name": "local-report-does-not-upload-output",
+    "contract": "LocalExecutionReport",
+    "valid": false,
+    "document": {
+      "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+      "revision": 1,
+      "generation": 1,
+      "state": "accepted",
+      "recipe_id": "video",
+      "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "outputs": {}
+    }
+  },
+  {
+    "name": "local-exchange",
+    "contract": "LocalExchange",
+    "valid": true,
+    "document": {
+      "receipts": [
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        }
+      ],
+      "reports": [
+        {
+          "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+          "revision": 1,
+          "generation": 1,
+          "state": "accepted",
+          "recipe_id": "video",
+          "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        }
+      ]
+    }
+  },
+  {
+    "name": "local-exchange-bounded",
+    "contract": "LocalExchange",
+    "valid": false,
+    "document": {
+      "receipts": [
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        },
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
+          "accepted": true
+        }
+      ],
+      "reports": []
+    }
+  },
+  {
+    "name": "local-exchange-response",
+    "contract": "LocalExchangeResult",
+    "valid": true,
+    "document": {
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "site_id": "sit_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "commands": [
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "tenant_id": "ten_example0",
+          "project_id": "prj_example0",
+          "site_id": "sit_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+          "generation": 1,
+          "expires_at": 1800000000,
+          "action": "start",
+          "recipe_id": "video",
+          "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29"
+        }
+      ],
+      "command_receipts": [
+        "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "report_receipts": [
+        {
+          "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+          "revision": 1
+        }
+      ]
+    }
   }
 ]

@@ -77,4 +77,93 @@ interface SiteFederation {
   // Owner revocation requires a user session and manage_sites permission.
   @post @route("/{site_id}/revoke")
   revoke(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier, @path site_id: SiteId): SiteConnection | FederationErrorResponse;
+
+  // Owner-authenticated management of explicitly approved local recipes. No rental.
+  @post @route("/{site_id}/commands")
+  command(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier, @path site_id: SiteId,
+    @body command: LocalExecutionCommand): LocalExecutionCommand | FederationErrorResponse;
+
+  @get @route("/{site_id}/commands/{command_id}")
+  commandStatus(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier,
+    @path site_id: SiteId, @path command_id: LocalCommandId): LocalCommandStatus | FederationErrorResponse;
+
+  @get @route("/{site_id}/executions")
+  // Latest 100 reports. Older identified reports remain available by ID.
+  executions(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier, @path site_id: SiteId): LocalExecutionReport[] | FederationErrorResponse;
+
+  @get @route("/{site_id}/executions/{execution_id}")
+  execution(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier,
+    @path site_id: SiteId, @path execution_id: LocalExecutionId): LocalExecutionReport | FederationErrorResponse;
+
+  // The site credential is checked on every exchange, including result replay.
+  @post @route("/{site_id}/connection/exchange")
+  exchange(@path tenant_id: BackendIdentifier, @path project_id: BackendIdentifier, @path site_id: SiteId,
+    @body exchange: LocalExchange): LocalExchangeResult | FederationErrorResponse;
+}
+
+@pattern("^lex_[a-f0-9]{32}(?![\\s\\S])")
+scalar LocalExecutionId extends string;
+@pattern("^cmd_[a-f0-9]{32}(?![\\s\\S])")
+scalar LocalCommandId extends string;
+@pattern("^[a-z][a-z0-9_-]{0,63}(?![\\s\\S])")
+scalar LocalRecipeId extends string;
+@pattern("^[a-f0-9]{64}(?![\\s\\S])")
+scalar LocalDigest extends string;
+
+model LocalExecutionCommand {
+  command_id: LocalCommandId;
+  tenant_id: BackendIdentifier;
+  project_id: BackendIdentifier;
+  site_id: SiteId;
+  execution_id: LocalExecutionId;
+  generation: PositiveInteger;
+  expires_at: PositiveInteger;
+  action: "start" | "cancel";
+  recipe_id: LocalRecipeId;
+  recipe_sha256: LocalDigest;
+  // RFC 8785 SHA256 of every other field. This is an integrity check, not auth.
+  request_sha256: LocalDigest;
+}
+
+model LocalCommandReceipt {
+  command_id: LocalCommandId;
+  request_sha256: LocalDigest;
+  accepted: boolean;
+  @pattern("^[a-z][a-z0-9_]{0,63}(?![\\s\\S])")
+  error_code?: string;
+}
+
+model LocalCommandStatus {
+  command: LocalExecutionCommand;
+  receipt?: LocalCommandReceipt;
+}
+
+model LocalExecutionReport {
+  execution_id: LocalExecutionId;
+  revision: PositiveInteger;
+  generation: PositiveInteger;
+  state: "accepted" | "dispatching" | "queued" | "running" | "succeeded" | "failed" | "uncertain" | "cancel_requested" | "canceled";
+  recipe_id: LocalRecipeId;
+  recipe_sha256: LocalDigest;
+  @pattern("^[a-z][a-z0-9_]{0,63}(?![\\s\\S])")
+  error_code?: string;
+}
+
+model LocalExchange {
+  @maxItems(20) receipts: LocalCommandReceipt[];
+  @maxItems(20) reports: LocalExecutionReport[];
+}
+
+model LocalReportReceipt {
+  execution_id: LocalExecutionId;
+  revision: PositiveInteger;
+}
+
+model LocalExchangeResult {
+  tenant_id: BackendIdentifier;
+  project_id: BackendIdentifier;
+  site_id: SiteId;
+  @maxItems(20) commands: LocalExecutionCommand[];
+  @maxItems(20) command_receipts: LocalCommandId[];
+  @maxItems(20) report_receipts: LocalReportReceipt[];
 }
