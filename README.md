@@ -61,6 +61,11 @@ Inventory reports **allocatable resources, not currently free GPUs**. Kubernetes
 owns placement and admission. Multiple consumer cards and supported enterprise
 partitions can coexist in a site without pretending they have identical capabilities.
 
+The [Kueue execution adapter](docs/kubernetes-backend.md) now implements the backend
+lifecycle with durable create receipts, Job UID adoption and conditional cleanup.
+Its failure cases and official client models are tested offline; live GPU-cluster
+qualification remains required.
+
 `--gpus N` requests N devices on **one worker**, even if the cluster has many
 workers. Distributed JobSets, HAMi sharing setup, DRA claims, VM pass-through and
 multi-GPU video recipes remain planned. See the [support matrix and engine choices](docs/gpu-modes.md).
