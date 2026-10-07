@@ -35,6 +35,11 @@ class LocalBoundary:
                 return
             return await self.app(scope, receive, send)
         request = Request(scope)
+        # Single-valued security headers must stay unambiguous across parsers.
+        # get() alone chooses the first value and can ignore a conflicting one.
+        if any(len(request.headers.getlist(name)) > 1 for name in
+               ("host", "origin", "authorization", "sec-fetch-site")):
+            return await JSONResponse({"error": "ambiguous_security_headers"}, 400)(scope, receive, send)
         origin = request.headers.get("origin")
         host = request.headers.get("host")
         forbidden = (host != self.origin.removeprefix("http://") or

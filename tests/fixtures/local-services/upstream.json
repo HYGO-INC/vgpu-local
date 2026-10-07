@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "artifact": "local-service-conformance",
+  "version": "1.0.0",
+  "upstream": {
+    "repository": "HYGO-INC/shared",
+    "commit": "b24fd64a3ef9ee0bd0f731377b2952ad1cdca672",
+    "path": "conformance/local-services"
+  },
+  "files": {
+    "cases.json": "27c2d4c5db95bd4418d2f9790fa99e11eec03c176e56700f2bd2c4d5fe2c70b4",
+    "README.md": "1c75c40767d70fd0d288b36c0248ad51c5a1e67604c0180b35b665bbec6251a4",
+    "LICENSE": "446493be819137e5d1156ad7378d49e68b615eae24a85e4656997d89c2a5df3b"
+  }
+}

@@ -89,7 +89,15 @@ browser flow or production account dashboard integration.
 ## Qualification
 
 Run `pnpm check` for cross-language contracts, loopback boundaries, durable replay,
-lost engine replies, actual process restarts and detached CLI lifetime. The browser
+lost engine replies, actual process restarts and detached CLI lifetime. The
+[shared security corpus](../tests/fixtures/local-services/README.md) is pinned
+under test fixtures and exercised over the real HTTP listener. It checks exact
+Host/Origin handling, duplicate headers, bearer authentication and forwarded
+header rejection. The upstream commit and hashes are in `upstream.json`; update
+the canonical corpus in shared and use its export script rather than editing
+these copies. The fixture data adds no runtime dependency or download.
+
+The browser
 group is development-only. Use your own installed Chrome, never a signed-in user
 session:
 
