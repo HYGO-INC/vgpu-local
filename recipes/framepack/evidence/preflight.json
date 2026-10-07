@@ -1,0 +1,58 @@
+{
+  "lock": {
+    "schema_version": 1,
+    "source": "https://github.com/lllyasviel/FramePack.git",
+    "source_revision": "97fe5dbe06ac1f337ece08935b1076a35eefeeb9",
+    "models": [
+      {
+        "id": "hunyuanvideo-community/HunyuanVideo",
+        "revision": "e8c2aaa66fe3742a32c11a6766aecbf07c56e773",
+        "directory": "hunyuan",
+        "allow_patterns": [
+          "text_encoder/*",
+          "text_encoder_2/*",
+          "tokenizer/*",
+          "tokenizer_2/*",
+          "vae/*"
+        ]
+      },
+      {
+        "id": "lllyasviel/flux_redux_bfl",
+        "revision": "45b801affc54ff2af4e5daf1b282e0921901db87",
+        "directory": "redux",
+        "allow_patterns": [
+          "feature_extractor/*",
+          "image_encoder/*"
+        ]
+      },
+      {
+        "id": "lllyasviel/FramePackI2V_HY",
+        "revision": "86cef4396041b6002c957852daac4c91aaa47c79",
+        "directory": "framepack",
+        "allow_patterns": [
+          "*.json",
+          "*.safetensors"
+        ]
+      }
+    ],
+    "seed": 20261006,
+    "prompt": "A small red wooden boat moves slowly across a calm mountain lake at sunrise. Gentle ripples spread across the water. Wide shot, stable camera, natural light.",
+    "steps": 25,
+    "latent_window_size": 9,
+    "cfg": 1.0,
+    "distilled_guidance": 10.0,
+    "guidance_rescale": 0.0,
+    "gpu_memory_preservation_gb": 6.0,
+    "teacache": false,
+    "mp4_crf": 16
+  },
+  "action": "preflight",
+  "python": "3.10.11",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "torch": "2.6.0+cu126",
+  "cuda": "12.6",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "total_gpu_bytes": 25756696576,
+  "system_memory_bytes": 68490145792,
+  "status": "passed"
+}

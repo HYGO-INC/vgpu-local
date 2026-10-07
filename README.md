@@ -80,6 +80,10 @@ single-4090 video qualification, with cold-load time, warm generation time and
 memory measured separately. It is independent of the cloud adapters and does not
 claim long-video or multi-GPU qualification.
 
+The [pinned FramePack recipe](recipes/framepack/README.md) also produced a decoded
+short clip on the 4090. It took 11.1 minutes and caused substantial host-memory
+pressure. Its recorded result is not an unattended-service recommendation.
+
 The Python library includes Vast/Runpod adapters through SkyPilot and a Theta
 GPU Node API v1 client. These are tested with injected SDK/HTTP transports;
 live supplier qualification is still pending. See [provider boundaries](docs/providers.md).

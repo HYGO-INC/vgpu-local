@@ -1,0 +1,76 @@
+{
+  "lock": {
+    "schema_version": 1,
+    "source": "https://github.com/lllyasviel/FramePack.git",
+    "source_revision": "97fe5dbe06ac1f337ece08935b1076a35eefeeb9",
+    "models": [
+      {
+        "id": "hunyuanvideo-community/HunyuanVideo",
+        "revision": "e8c2aaa66fe3742a32c11a6766aecbf07c56e773",
+        "directory": "hunyuan",
+        "allow_patterns": [
+          "text_encoder/*",
+          "text_encoder_2/*",
+          "tokenizer/*",
+          "tokenizer_2/*",
+          "vae/*"
+        ]
+      },
+      {
+        "id": "lllyasviel/flux_redux_bfl",
+        "revision": "45b801affc54ff2af4e5daf1b282e0921901db87",
+        "directory": "redux",
+        "allow_patterns": [
+          "feature_extractor/*",
+          "image_encoder/*"
+        ]
+      },
+      {
+        "id": "lllyasviel/FramePackI2V_HY",
+        "revision": "86cef4396041b6002c957852daac4c91aaa47c79",
+        "directory": "framepack",
+        "allow_patterns": [
+          "*.json",
+          "*.safetensors"
+        ]
+      }
+    ],
+    "seed": 20261006,
+    "prompt": "A small red wooden boat moves slowly across a calm mountain lake at sunrise. Gentle ripples spread across the water. Wide shot, stable camera, natural light.",
+    "steps": 25,
+    "latent_window_size": 9,
+    "cfg": 1.0,
+    "distilled_guidance": 10.0,
+    "guidance_rescale": 0.0,
+    "gpu_memory_preservation_gb": 6.0,
+    "teacache": false,
+    "mp4_crf": 16
+  },
+  "action": "benchmark",
+  "python": "3.10.11",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "torch": "2.6.0+cu126",
+  "cuda": "12.6",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "total_gpu_bytes": 25756696576,
+  "system_memory_bytes": 68490145792,
+  "load_seconds": 4.720553899882361,
+  "input_sha256": "7bcffc793292cd4e61df5a69fd97e2ac82c6a864434cd707ab9f54cdff9ac3b3",
+  "requested_seconds": 5.0,
+  "runs": [
+    {
+      "generation_seconds": 666.6354016999248,
+      "frames": 145,
+      "fps": 30.0,
+      "width": 832,
+      "height": 480,
+      "video_seconds": 4.833333333333333,
+      "torch_peak_allocated_bytes": 19154924544,
+      "output": "run-1\\261006_174051_280_1644_37.mp4"
+    }
+  ],
+  "peak_process_rss_bytes": 37978853376,
+  "peak_board_memory_mib": 23014,
+  "minimum_system_available_bytes": 146911232,
+  "status": "passed"
+}
