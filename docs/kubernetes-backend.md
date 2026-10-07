@@ -13,6 +13,46 @@ GPU drivers, device plugins, RuntimeClass, namespace, Kueue and LocalQueue must
 already exist. Configure the served Kueue API version (`v1beta1` or `v1beta2`)
 explicitly. No qualification here installs or mutates a real cluster.
 
+## Local command interface
+
+Copy [the site configuration](../examples/kubernetes-site.json) and
+[the job request](../examples/kubernetes-request.json), then set the actual
+context, namespace UID, queue, GPU labels, qualified image and command. Site
+configuration is operator-owned and separate from each workload request. The
+local tenant/project/account identifiers need no vgpu.com account. The shared
+request's price ceiling is unused by this local adapter; the example's positive
+placeholder does not enable billing or cloud access.
+
+```sh
+uv run --extra kubernetes vgpu-local kubernetes validate --config site.json
+uv run --extra kubernetes vgpu-local kubernetes init --journal operations.db
+uv run --extra kubernetes vgpu-local kubernetes provision --config site.json --journal operations.db --account-id home-site --request job.json
+uv run --extra kubernetes vgpu-local kubernetes observe --config site.json --journal operations.db --account-id home-site --request job.json
+uv run --extra kubernetes vgpu-local kubernetes release --config site.json --journal operations.db --account-id home-site --request job.json
+```
+
+Initialization exclusively creates a new journal and makes no cluster calls.
+Subsequent commands require an existing valid journal and never recreate it if
+the file disappears. Back up and protect that file as operation recovery
+evidence. Restore a missing journal for an existing site; initializing a new file
+does not recover old operations. Validation is offline and checks only the
+configuration shape, not whether the site exists or has available GPUs.
+
+Re-use the unchanged request file and journal when observing an uncertain
+operation. A second `provision` with the same identity reconciles the original;
+it does not submit another Job. Reusing the identity with different intent is
+rejected. Use a new operation ID only for a deliberately new workload. The CLI
+performs one bounded API sequence per invocation. It does not supervise jobs in
+the background or automatically clean up finished Jobs; call `release` and
+observe until cleanup is confirmed. Hosted lifecycle automation uses this same
+backend independently.
+
+The older `submit-job` command remains a direct, name-based `kubectl create`
+convenience without these durable receipts. Prefer the `kubernetes` commands for
+recoverable operation. Neither command family provisions or joins GPU machines.
+
+## Python interface
+
 ```python
 from vgpu_local.journal import Journal
 from vgpu_local.kubernetes_api import KubernetesAPI

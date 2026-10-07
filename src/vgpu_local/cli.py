@@ -13,6 +13,8 @@ def main():
     commands = parser.add_subparsers(dest="action", required=True)
     from .interruption_cli import register
     register(commands)
+    from .kubernetes_cli import register as register_kubernetes
+    register_kubernetes(commands)
     inventory = commands.add_parser("inventory", help="Report allocatable GPUs; this is not free capacity")
     inventory.add_argument("--nodes-json", type=Path, help="Read a saved kubectl nodes response offline")
     inventory.add_argument("--context", help="Explicit Kubernetes context for live inventory")
@@ -45,6 +47,9 @@ def main():
     try:
         if args.action == "interruption":
             from .interruption_cli import run
+            result = run(args)
+        elif args.action == "kubernetes":
+            from .kubernetes_cli import run
             result = run(args)
         elif args.action == "cloud":
             from .cloud import CloudConnection, SystemKeyring

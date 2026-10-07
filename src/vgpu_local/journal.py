@@ -35,17 +35,22 @@ def scope(request) -> str:
 
 
 class Journal:
-    def __init__(self, path: str | Path):
+    def __init__(self, path: str | Path, *, create: bool = True):
         self.path = str(path)
+        self.existing_only = not create
         with self.connection() as db:
-            db.execute("""CREATE TABLE IF NOT EXISTS operations (
-                scope TEXT PRIMARY KEY, fingerprint TEXT NOT NULL,
-                receipt TEXT NOT NULL
-            )""")
+            if create:
+                db.execute("""CREATE TABLE IF NOT EXISTS operations (
+                    scope TEXT PRIMARY KEY, fingerprint TEXT NOT NULL,
+                    receipt TEXT NOT NULL
+                )""")
+            else:
+                db.execute("SELECT scope,fingerprint,receipt FROM operations LIMIT 0")
 
     @contextmanager
     def connection(self):
-        db = sqlite3.connect(self.path, timeout=30, isolation_level=None)
+        target = Path(self.path).resolve().as_uri()+"?mode=rw" if self.existing_only else self.path
+        db = sqlite3.connect(target, uri=self.existing_only, timeout=30, isolation_level=None)
         db.row_factory = sqlite3.Row
         try:
             db.execute("PRAGMA busy_timeout=30000")

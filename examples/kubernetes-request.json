@@ -1,0 +1,17 @@
+{
+  "tenant_id": "local-owner",
+  "project_id": "local-project",
+  "account_id": "home-site",
+  "operation_id": "gpu-check-001",
+  "generation": 1,
+  "provider": "kubernetes",
+  "image": "nvidia/cuda:12.8.1-base-ubuntu22.04",
+  "gpu_model": "RTX4090",
+  "gpu_count": 1,
+  "num_nodes": 1,
+  "region": "home",
+  "capacity_mode": "on_demand",
+  "workload_trust": "owner",
+  "max_hourly_price_microusd": 1,
+  "command": ["nvidia-smi"]
+}

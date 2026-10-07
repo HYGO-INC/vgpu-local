@@ -63,6 +63,9 @@ partitions can coexist in a site without pretending they have identical capabili
 
 The [Kueue execution adapter](docs/kubernetes-backend.md) now implements the backend
 lifecycle with durable create receipts, Job UID adoption and conditional cleanup.
+Its `kubernetes init/provision/observe/release` commands use an explicit site
+configuration and retained local journal without a cloud login. Use them when
+you need recoverable operation instead of direct `submit-job` convenience.
 Its failure cases and official client models are tested offline; live GPU-cluster
 qualification remains required.
 

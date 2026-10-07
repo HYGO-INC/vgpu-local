@@ -1,0 +1,15 @@
+{
+  "context": "my-home-cluster",
+  "namespace": "gpu-jobs",
+  "namespace_uid": "REPLACE_WITH_EXISTING_NAMESPACE_UID",
+  "queue": "gpu",
+  "region": "home",
+  "queue_api_version": "v1beta1",
+  "runtime_class": "nvidia",
+  "gpu_classes": {
+    "RTX4090": {
+      "resource": "nvidia.com/gpu",
+      "product": "NVIDIA-GeForce-RTX-4090"
+    }
+  }
+}
