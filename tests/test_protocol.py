@@ -13,6 +13,10 @@ def test_shared_protocol_corpus():
     root = Path(__file__).resolve().parents[1]
     cases = json.loads((root / "protocol/fixtures.json").read_text())
     bundle = json.loads((root / "protocol/generated/resources.json").read_text())
+    for name, definition in bundle["$defs"].items():
+        if definition.get("type") == "object":
+            for valid in (True, False):
+                assert any(c["contract"] == name and c["valid"] == valid for c in cases), (name, valid)
     registry = Registry().with_resources((schema["$id"], Resource.from_contents(schema))
                                          for schema in bundle["$defs"].values())
     output = subprocess.check_output(["node", "protocol/oracle.cjs"], cwd=root, text=True)

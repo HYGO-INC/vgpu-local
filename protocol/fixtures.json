@@ -1445,5 +1445,81 @@
         }
       ]
     }
+  },
+  {
+    "name": "local-command-status-no-null-receipt",
+    "contract": "LocalCommandStatus",
+    "valid": false,
+    "document": {
+      "command": {
+        "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "tenant_id": "ten_example0",
+        "project_id": "prj_example0",
+        "site_id": "sit_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+        "generation": 1,
+        "expires_at": 1800000000,
+        "action": "start",
+        "recipe_id": "video",
+        "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29"
+      },
+      "receipt": null
+    },
+    "path": "/receipt"
+  },
+  {
+    "name": "local-report-receipt",
+    "contract": "LocalReportReceipt",
+    "valid": true,
+    "document": {
+      "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+      "revision": 1
+    }
+  },
+  {
+    "name": "local-report-receipt-positive-revision",
+    "contract": "LocalReportReceipt",
+    "valid": false,
+    "document": {
+      "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+      "revision": 0
+    },
+    "path": "/revision"
+  },
+  {
+    "name": "local-exchange-response-numeric-site-rejected",
+    "contract": "LocalExchangeResult",
+    "valid": false,
+    "document": {
+      "tenant_id": "ten_example0",
+      "project_id": "prj_example0",
+      "site_id": 5,
+      "commands": [
+        {
+          "command_id": "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "tenant_id": "ten_example0",
+          "project_id": "prj_example0",
+          "site_id": "sit_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+          "generation": 1,
+          "expires_at": 1800000000,
+          "action": "start",
+          "recipe_id": "video",
+          "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29"
+        }
+      ],
+      "command_receipts": [
+        "cmd_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "report_receipts": [
+        {
+          "execution_id": "lex_cccccccccccccccccccccccccccccccc",
+          "revision": 1
+        }
+      ]
+    },
+    "path": "/site_id"
   }
 ]
