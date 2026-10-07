@@ -92,3 +92,37 @@ def test_site_configuration_rejects_unknown_and_unbounded_bindings():
     copy = validate_config(config)
     copy['gpu_classes']['RTX4090']['product'] = 'changed'
     assert copy != validate_config(config)
+
+
+def test_local_preemption_cli_keeps_notice_open_until_identified_pods_are_gone(setup):
+    from vgpu_local.contracts.models import InterruptionScope
+    from vgpu_local.interruptions import InterruptionController
+    from test_interruptions import source, request as response
+    call,api,paths,request = setup
+    call('init')
+    observed = call('provision')
+    runtime = InterruptionScope(tenant_id=request['tenant_id'],project_id=request['project_id'],generation=1,
+        lease_id='local-lease',job_id='local-job',attempt_id='local-attempt',controller_epoch=1,agent_session_id='igs_'+'b'*32)
+    notice_journal = paths['journal'].parent/'notices.db'
+    config = paths['journal'].parent/'reclaim.json'
+    config.write_text(json.dumps({'version':1,'scope':runtime.model_dump(),'journal':str(notice_journal),
+        'participants':[{'id':'rank-0','mailbox':str(paths['journal'].parent/'mailbox')}]}))
+    args = Namespace(kubernetes_action='reclaim',account_id='home-site',interruption_config=config,
+                     resource_id=observed['resource_id'],**paths)
+    connections = api.connections
+    with pytest.raises(ValueError,match='recovery evidence'): cli.run(args)
+    assert api.connections == connections
+    book = InterruptionController(Journal(notice_journal),runtime,['rank-0'])
+    notice = book.publish(source(release_by_ms=None,signal_at_ms=None,extension_limit_ms=None,allowed_actions=['ack','ready']))
+    book.respond(response(notice),participant_id='rank-0')
+    assert cli.run(args)['state'] == 'waiting' and api.deletes == 0
+    book.respond(response(notice,action='ready'),participant_id='rank-0')
+    api.retain_pods = True
+    assert cli.run(args)['state'] == 'releasing'
+    assert book.snapshot().interruptions[0].phase == 'releasing'
+    assert api.deletes == 1 and api.pods
+    api.pods = []
+    assert cli.run(args)['state'] == 'completed'
+    assert book.snapshot().interruptions[0].phase == 'completed'
+    assert cli.run(args)['state'] == 'completed' and api.deletes == 1
+    assert api.closes == api.connections

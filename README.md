@@ -68,6 +68,10 @@ configuration and retained local journal without a cloud login. Use them when
 you need recoverable operation instead of direct `submit-job` convenience.
 Its failure cases and official client models are tested offline; live GPU-cluster
 qualification remains required.
+The [local reclaim command](docs/interruptions.md#local-kubernetes-reclaim)
+connects native notice readiness/deadlines to that same backend and keeps the
+notice pending through failed teardown or retained pods. It is one reconciliation
+step for the local owner, not a deployed agent or a hardware fence.
 
 `--gpus N` requests N devices on **one worker**, even if the cluster has many
 workers. Distributed JobSets, HAMi sharing setup, DRA claims, VM pass-through and

@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import sqlite3
+import time
 
 from .contracts.models import BackendRequest
 from .errors import KeyConflict, OutcomeUnknown, UnsupportedCapability
@@ -18,12 +19,15 @@ def register(commands):
     initialize.add_argument("--journal", type=Path, required=True)
     validate = actions.add_parser("validate", help="Validate operator configuration offline")
     validate.add_argument("--config", type=Path, required=True)
-    for name in ("provision", "observe", "release"):
+    for name in ("provision", "observe", "release", "reclaim"):
         command = actions.add_parser(name)
         command.add_argument("--config", type=Path, required=True)
         command.add_argument("--journal", type=Path, required=True)
         command.add_argument("--account-id", required=True)
         command.add_argument("--request", type=Path, required=True)
+        if name == "reclaim":
+            command.add_argument("--interruption-config", type=Path, required=True)
+            command.add_argument("--resource-id", required=True, help="Previously observed allocation; binds this runtime immutably")
 
 
 def read_object(path):
@@ -72,6 +76,17 @@ def run(args):
     if args.kubernetes_action != "provision":
         try: journal.read(scope(request))
         except KeyError: raise ValueError("No operation receipt; no cluster call performed") from None
+    controller = None
+    if args.kubernetes_action == "reclaim":
+        from .interruption_cli import configuration
+        from .interruptions import InterruptionController
+        runtime,notice_journal,participants = configuration(args.interruption_config)
+        if any(getattr(request,key) != getattr(runtime,key) for key in ("tenant_id","project_id","generation")):
+            raise ValueError("Interruption runtime does not match this allocation")
+        try:
+            controller = InterruptionController(Journal(notice_journal,create=False),runtime,list(participants),existing_only=True)
+        except (sqlite3.Error,KeyError):
+            raise ValueError("Interruption recovery evidence is missing; no cluster call performed") from None
     api = None
     try:
         api = KubernetesAPI(context=config["context"], namespace=config["namespace"],
@@ -80,6 +95,9 @@ def run(args):
             namespace=config["namespace"],namespace_uid=config["namespace_uid"],queue=config["queue"],
             region=config["region"],runtime_class=config["runtime_class"],
             gpu_classes={name:GpuClass(**gpu) for name,gpu in config["gpu_classes"].items()})
+        if controller is not None:
+            from .reclaim import LocalReclaimer
+            return LocalReclaimer(controller,backend,request,args.resource_id).step(time.time_ns()//1_000_000)
         return getattr(backend,args.kubernetes_action)(request).model_dump(mode="json")
     except (OutcomeUnknown, KeyConflict, UnsupportedCapability) as error:
         raise RuntimeError(type(error).__name__+": preserve this journal and request; no automatic resubmission") from None

@@ -129,6 +129,42 @@ The relay never invokes a shell, sends a stop signal, grants extensions, confirm
 release or changes billing. Those remain the external reclaim controller's work.
 Do not mount the operator journal/configuration into workload containers.
 
+### Local Kubernetes reclaim
+
+The owner can now connect the exchange to the identified Kubernetes backend with
+one bounded reconciliation command. Initialize the allocation journal, provision
+the job and record its resource ID through the `kubernetes` CLI first. The notice
+runtime must already exist; missing recovery state is rejected before cluster
+access. Its tenant/project/generation must match the allocation request.
+
+```sh
+vgpu-local kubernetes reclaim --config site.json --journal operations.db \
+  --account-id home-site --request job.json --resource-id k8s:previously-observed-job-uid \
+  --interruption-config /var/lib/vgpu/runtime/relay.json
+```
+
+The command immutably binds that runtime to the complete request and resource.
+It returns `waiting` until all expected participants are ready or a known stop
+time is due. An ack alone, an advisory or an unknown deadline cannot trigger
+teardown. Source withdrawals and explicit extension grants are re-read before
+authorization. Once authorization commits, a later withdrawal cannot undo it.
+
+Reclamation first observes the exact resource, then uses the existing backend's
+UID-preconditioned deletion. Lost replies are reconciled on the next invocation.
+`releasing` persists while the Job or its owned pods remain; `completed` requires
+backend release evidence and closes the notice. A crash after backend release can
+finish notice publication without deleting again. Repeat the file relay to publish
+the updated snapshot to workloads. No command changes a financial ledger or
+validates a claimed checkpoint manifest.
+
+This is a local-owner reconciliation step, not a deployed deadline supervisor,
+hard power/storage fence or hosted lifecycle integration. Kubernetes retains its
+termination grace period and cleanup ownership. Scheduling this step late or
+losing access to the node cannot establish a guaranteed shutdown time. Do not run
+it alongside another lifecycle owner controlling the same allocation. Live cluster
+execution remains unqualified; the command path passes with a controlled API
+including retained orphan pods. Supplier watchers and agent installation remain.
+
 The controller tests cover cancellation/release races, duplicate/late updates,
 receipt replay, participant aggregation, scoped runtime rejection, multiple
 constraints, explicit extensions and confirmed release. Linux file tests exercise

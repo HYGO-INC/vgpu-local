@@ -47,7 +47,7 @@ class InterruptionController:
     or returning a receipt. Deployment must fence an old controller externally;
     a generation number alone does not revoke GPU or shared-volume access.
     """
-    def __init__(self, store: ReceiptStore, scope: InterruptionScope, participants: list[str]):
+    def __init__(self, store: ReceiptStore, scope: InterruptionScope, participants: list[str], *, existing_only=False):
         scope = InterruptionScope.model_validate(scope.model_dump())
         if (not participants or len(participants) > 64 or len(participants) != len(set(participants))
                 or any(not isinstance(item, str) or not 1 <= len(item) <= 255 for item in participants)):
@@ -55,6 +55,8 @@ class InterruptionController:
         self.store, self.scope = store, scope
         self.key = fingerprint({"interruption_runtime": scope.model_dump()})
         self.participants = frozenset(participants)
+        if existing_only:
+            store.read(self.key)  # Missing recovery evidence must not initialize a new runtime.
         store.begin(self.key, {"scope": scope.model_dump(), "participants": sorted(participants)},
                     {"cursor": 0, "notices": {}, "requests": {}, "grants": {}, "events": [], "release_evidence": {}, "authorizations": {}, "closed": False})
 

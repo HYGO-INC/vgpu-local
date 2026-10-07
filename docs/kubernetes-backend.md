@@ -113,6 +113,12 @@ the installed client's wire models, deletion preconditions and bounded calls
 without reading a kubeconfig or contacting a cluster. Real Kueue admission,
 device-plugin allocation, node failure and GPU execution remain unqualified.
 
+The [local interruption reclaim bridge](interruptions.md#local-kubernetes-reclaim)
+uses this same observation and deletion path. It immutably binds an existing
+runtime to the request/resource, waits for authorization, and requires confirmed
+cleanup before completing the notice. It does not replace Kubernetes/Kueue or
+provide a second hosted lifecycle controller.
+
 Sources: [Kubernetes Job semantics](https://kubernetes.io/docs/concepts/workloads/controllers/job/),
 [foreground deletion](https://kubernetes.io/docs/concepts/architecture/garbage-collection/),
 [official Python client v35](https://github.com/kubernetes-client/python/tree/v35.0.0).
