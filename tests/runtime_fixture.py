@@ -67,6 +67,9 @@ def crash_runtime(info, launcher):
 class EngineFixture:
     def __init__(self):
         self.jobs, self.history, self.posts = {}, {}, 0
+        # Prompts in ComfyUI's pending queue. Canceling one dequeues it without
+        # any history, as ComfyUI's /api/jobs/{id}/cancel does.
+        self.waiting = set()
         self.lose_reply = False
         self.lock = threading.Lock()
         fixture = self
@@ -74,7 +77,9 @@ class EngineFixture:
             def log_message(self, *args): pass
             def do_GET(self):
                 with fixture.lock:
-                    if self.path == "/queue": body = {"queue_running": list(fixture.jobs.values()), "queue_pending": []}
+                    if self.path == "/queue": body = {
+                        "queue_running": [entry for job, entry in fixture.jobs.items() if job not in fixture.waiting],
+                        "queue_pending": [entry for job, entry in fixture.jobs.items() if job in fixture.waiting]}
                     elif self.path.startswith("/history/"):
                         job = self.path.removeprefix("/history/")
                         body = {job: fixture.history[job]} if job in fixture.history else {}
@@ -93,8 +98,10 @@ class EngineFixture:
                     self.reply({"prompt_id": job, "number": 0, "node_errors": {}})
                 elif self.path.endswith("/cancel"):
                     job = self.path.split("/")[-2]
-                    found = fixture.finish(job, canceled=True)
-                    self.reply({"cancelled": found})
+                    with fixture.lock:
+                        dequeued = job in fixture.waiting and fixture.jobs.pop(job, None) is not None
+                        fixture.waiting.discard(job)
+                    self.reply({"cancelled": dequeued or fixture.finish(job, canceled=True)})
                 else: self.send_error(404)
             def reply(self, body):
                 data = json.dumps(body).encode()
@@ -108,6 +115,7 @@ class EngineFixture:
     def finish(self, job, *, canceled=False):
         with self.lock:
             entry = self.jobs.pop(job, None)
+            self.waiting.discard(job)
             if not entry: return False
             self.history[job] = {"prompt": entry, "status": {"completed": not canceled,
                 "status_str": "error" if canceled else "success",

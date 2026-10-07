@@ -37,8 +37,16 @@ class Runtime:
                         # First prove that the engine job is ours; missing evidence
                         # cannot authorize canceling an unrelated/reused identifier.
                         if changes["state"] in {"queued", "running"}:
-                            self.engine.cancel(job)
-                        changes["state"] = "cancel_requested"
+                            # ComfyUI drops a dequeued prompt without recording history.
+                            if self.engine.cancel(job) and changes["state"] == "queued":
+                                changes["dequeued"] = True
+                            changes["state"] = "cancel_requested"
+                        elif changes["state"] == "uncertain" and job.get("dequeued"):
+                            # Seen queued, removed on our confirmed request, and now neither
+                            # queued, running nor recorded: it never ran.
+                            changes.update(state="canceled", error_code="engine_dequeued")
+                        else:
+                            changes["state"] = "cancel_requested"
                 self.store.update(job["execution_id"], job["revision"], **changes)
             except EngineError as error:
                 self.store.update(job["execution_id"], job["revision"],

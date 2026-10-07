@@ -129,6 +129,41 @@ def test_specific_cancellation_does_not_stop_another_engine_job(tmp_path):
         assert len(engine.jobs) == 1 and engine.posts == 2
 
 
+def test_canceling_a_queued_engine_job_finishes_although_the_engine_records_nothing(tmp_path):
+    with EngineFixture() as engine:
+        store = setup(tmp_path / "runtime", engine)
+        running, waiting = command(store), command(store)
+        for c in (running, waiting): store.accept(c, SCOPE, origin="cloud")
+        runtime = Runtime(store, ComfyEngine(engine.endpoint))
+        runtime.step()
+        engine.waiting.add(store.job(waiting["execution_id"])["engine_job_id"])
+        runtime.step()
+        assert store.job(waiting["execution_id"])["state"] == "queued"
+        cancel = command(store, action="cancel", generation=2, execution_id=waiting["execution_id"])
+        store.accept(cancel, SCOPE, origin="cloud")
+        runtime.step()  # The engine confirms removing the pending prompt.
+        assert store.job(waiting["execution_id"])["state"] == "cancel_requested"
+        runtime.step()  # Neither queued, running nor in history: it never ran.
+        job = store.job(waiting["execution_id"])
+        assert (job["state"], job["error_code"]) == ("canceled", "engine_dequeued")
+        assert store.job(running["execution_id"])["state"] == "running"
+        assert engine.history == {} and engine.posts == 2
+
+
+def test_a_job_missing_from_the_engine_is_not_assumed_canceled(tmp_path):
+    with EngineFixture() as engine:
+        store = setup(tmp_path / "runtime", engine)
+        c = command(store); store.accept(c, SCOPE, origin="cloud")
+        runtime = Runtime(store, ComfyEngine(engine.endpoint))
+        runtime.step()
+        cancel = command(store, action="cancel", generation=2, execution_id=c["execution_id"])
+        store.accept(cancel, SCOPE, origin="cloud")
+        engine.jobs.clear()  # Lost without any record, e.g. an engine restart.
+        runtime.step(); runtime.step()
+        job = store.job(c["execution_id"])
+        assert job["state"] == "cancel_requested" and not job.get("dequeued")
+
+
 def test_unsupported_targeted_cancellation_never_uses_global_interrupt(store):
     c = command(store); store.accept(c, SCOPE, origin="cloud")
     job = store.claim_submission(c["execution_id"])
