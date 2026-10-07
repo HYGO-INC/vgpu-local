@@ -1,4 +1,9 @@
-# Local GPU site setup
+# Optional Kubernetes GPU pool setup
+
+For a single computer, begin with `vgpu-local doctor` and an existing local engine.
+Neither standalone nor account-connected use requires Kubernetes. This guide is
+only for users who choose existing-cluster integration. The
+`vgpu-local[kubernetes]` extra installs its SDK, not the cluster itself.
 
 Use Linux GPU worker nodes and an existing Kubernetes cluster or a K3s site.
 Windows/macOS can run the management CLI; that does not establish GPU-worker

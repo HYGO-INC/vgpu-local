@@ -70,14 +70,3 @@ model BackendWorkloadStatus {
   job_id: BackendIdentifier;
   state: "queued" | "running" | "succeeded" | "failed" | "canceled" | "unknown";
 }
-
-model BurstPolicy {
-  mode: "disabled" | "manual" | "automatic";
-  allowed_providers: BackendProvider[];
-  allowed_regions: string[];
-  max_hourly_price_microusd: NonnegativeInteger;
-  max_total_spend_microusd: NonnegativeInteger;
-  max_concurrent_remote_jobs: NonnegativeInteger;
-  local_wait_seconds: NonnegativeInteger;
-  data_policy: "local_only" | "artifacts_only";
-}

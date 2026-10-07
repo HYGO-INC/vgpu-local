@@ -5,6 +5,9 @@ it is not evidence of a hardware test or a feature implemented in this repositor
 
 | Function | Current status |
 |---|---|
+| Minimal installation without Kubernetes or an account | Implemented; no third-party base dependencies |
+| Inspect local GPUs and an existing local engine | Implemented; read-only, no downloads |
+| Website-managed standalone GPU jobs | Planned; scoped enrollment exists, dispatch does not |
 | Inventory a configured Kubernetes/K3s GPU pool | Implemented; reports allocatable resources, not free GPUs |
 | Submit a queued single-Pod job | Implemented; requires an installed NVIDIA allocation stack and Kueue |
 | Request N GPUs on one worker | Implemented with `--gpus N`; the application must use the devices |
@@ -14,8 +17,8 @@ it is not evidence of a hardware test or a feature implemented in this repositor
 | Install HAMi and account for GPU shares | Planned; no fractional memory/compute request renderer yet |
 | Allocate with DRA ResourceClaims | Planned; no claim renderer yet |
 | Pass through GPUs or configure NVIDIA Multi-vGPU in a VM | Planned; no hypervisor integration yet |
-| Distributed video/model recipe catalog | Planned; no hardware-qualified recipes yet |
-| Automatic cloud overflow | Planned; policy checks and adapters exist, federation/handoff does not |
+| Distributed video/model recipe catalog | Optional short-video recipes measured on one 4090; distributed execution unqualified |
+| Automatic cloud overflow | Separate hosted feature; supplier adapters and spending policy are absent here |
 
 ## Multiple devices do not become one larger device
 

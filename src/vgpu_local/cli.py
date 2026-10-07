@@ -4,22 +4,36 @@ import os
 from pathlib import Path
 import subprocess
 
-from .capabilities import capabilities
-from .kubernetes import gpu_inventory, render_job
-
-
 def main():
     parser = argparse.ArgumentParser(description="Local GPU tools; no cloud account required")
     commands = parser.add_subparsers(dest="action", required=True)
-    from .interruption_cli import register
-    register(commands)
-    from .kubernetes_cli import register as register_kubernetes
-    register_kubernetes(commands)
+    # The starter install has no third-party dependencies. Optional command
+    # registration must not import their implementations until requested.
+    import sys
+    selected = sys.argv[1:2]
+    if selected == ["interruption"]:
+        try:
+            from .interruption_cli import register
+        except ModuleNotFoundError:
+            parser.exit(2, "Install the optional vgpu-local[control] extra for interruption commands.\n")
+        register(commands)
+    else:
+        commands.add_parser("interruption", help="Optional interruption control extra")
+    if selected == ["kubernetes"]:
+        try:
+            from .kubernetes_cli import register as register_kubernetes
+        except ModuleNotFoundError:
+            parser.exit(2, "Install the optional vgpu-local[kubernetes] extra for cluster commands.\n")
+        register_kubernetes(commands)
+    else:
+        commands.add_parser("kubernetes", help="Optional existing-cluster integration")
+    from .starter import register as register_starter
+    register_starter(commands)
     inventory = commands.add_parser("inventory", help="Report allocatable GPUs; this is not free capacity")
     inventory.add_argument("--nodes-json", type=Path, help="Read a saved kubectl nodes response offline")
     inventory.add_argument("--context", help="Explicit Kubernetes context for live inventory")
     profile = commands.add_parser("capabilities")
-    profile.add_argument("provider", choices=["vast", "runpod", "theta", "kubernetes", "simulator"])
+    profile.add_argument("provider", choices=["kubernetes", "simulator"])
     cloud = commands.add_parser("cloud", help="Explicit cloud connection; does not enable spending or contribution")
     cloud_commands = cloud.add_subparsers(dest="cloud_action", required=True)
     for name in ("connect", "status", "disconnect", "renew"):
@@ -45,7 +59,10 @@ def main():
         job.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     try:
-        if args.action == "interruption":
+        if args.action in {"doctor", "engine"}:
+            from .starter import run
+            result = run(args)
+        elif args.action == "interruption":
             from .interruption_cli import run
             result = run(args)
         elif args.action == "kubernetes":
@@ -64,8 +81,10 @@ def main():
             else:
                 result = client.disconnect()
         elif args.action == "capabilities":
+            from .capabilities import capabilities
             result = capabilities(args.provider).model_dump()
         elif args.action == "inventory":
+            from .kubernetes import gpu_inventory
             if args.nodes_json:
                 nodes = json.loads(args.nodes_json.read_text(encoding="utf-8"))
             elif args.context:
@@ -76,6 +95,7 @@ def main():
                 parser.error("provide --nodes-json or an explicit --context")
             result = gpu_inventory(nodes)
         else:
+            from .kubernetes import render_job
             argv = args.command[1:] if args.command[:1] == ["--"] else args.command
             result = render_job(name=args.name, namespace=args.namespace, queue=args.queue,
                                 image=args.image, command=argv, gpu_count=args.gpus,
@@ -89,5 +109,8 @@ def main():
                                 input=json.dumps(result), text=True, check=True, timeout=30)
                 return
         print(json.dumps(result, indent=2))
+    except ModuleNotFoundError:
+        extra = "cloud" if args.action == "cloud" else "control"
+        parser.exit(2, f"Install the optional vgpu-local[{extra}] extra for this command.\n")
     except (ValueError, OSError, subprocess.SubprocessError, RuntimeError) as error:
         parser.exit(2, str(error) + "\n")

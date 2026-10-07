@@ -1,58 +1,67 @@
-# Local ownership and optional cloud connection
+# Local execution with optional hosted management
 
-The local product owns its site configuration, queues, workloads and data.
-Kubernetes/Kueue owns local admission and execution. A cloud connection uses
-outbound requests with a scoped site/project token; no cluster-admin kubeconfig
-is sent to the service. Installed local execution remains usable without a cloud
-account or Internet connection.
+The local product's purpose is using the owner's GPUs. It contains the smallest
+useful runtime and public interoperability contracts. Hosted scheduling, supplier
+adapters, pricing, spending policy, account services and billing belong to the
+hosted product, not this distribution.
 
-## Implemented
+## Installation and execution
 
-- Inventory and native suspended Job rendering/submission through an explicitly
-  selected Kubernetes context.
-- TypeSpec backend capability/request/observation and overflow policy contracts.
-- Reusable Vast/Runpod SkyPilot adapters, a Theta GPU Node HTTP client and a
-  persistent offline simulator. Live provider qualification remains outstanding.
-- Conservative overflow eligibility checks. Cloud execution itself remains off.
-- [Outbound connection enrollment](cloud-connection.md), with retry-stable site
-  credentials in the OS credential store. Enrollment enables neither spending nor
-  contribution. Client failure behavior is tested offline; production deployment
-  and the browser/device login flow remain outstanding.
-- Recoverable credential renewal in the OS store, with response-loss replay and
-  revoked/expired-credential handling. Hosted deployment remains separate.
-- [Native interruption exchange](interruptions.md): durable notice/response
-  semantics, ordered CloudEvents, expected-participant readiness and Linux files.
+The initial package has no third-party dependencies. `doctor` inspects this
+computer; `engine status` probes an explicit existing loopback engine. Neither
+downloads anything. Engines, model weights and cluster support are chosen later.
+Existing installations and model caches should be reused after compatibility
+checks. No opaque install-all script runs at startup.
 
-## Work still required
+The same local execution layer serves two modes:
 
-- Production identity integration, controller reconciliation, local console,
-  upgrades/restore and hardware-qualified installation profiles.
-- Hosted deployment of the federation HTTP endpoints and renewal service.
-  The connection handshake uses `vgpu.site.v1`; it is not a live service claim.
-- Atomic budget reservations in the cloud; quotes, maximum runtime, cleanup and
-  reconciliation of continuing remote costs during site disconnection.
-- A persisted handoff: fence the local submission against admission, stop/drain
-  an active attempt when recovering, and confirm storage writer exclusion before
-  a remote replacement starts. A queued status alone does not prove handoff safety.
-- Artifact preparation and explicit export grants. Do not copy local directories
-  or credentials when cloud overflow is enabled. `local_only` data stays local.
-- Workload recipes, multi-node JobSets, model endpoints, qualified sharing and
-  optional community capacity contribution.
+- **Standalone:** local CLI and, when implemented, a local browser console. No
+  cloud account, hosted stack or Internet requirement for installed workloads.
+- **Connected:** optional account pairing and vgpu.com management. The agent
+  connects outward; the user's computer needs no public IP, forwarded port,
+  cluster, Cloudflare account or cloud database.
 
-Overflow can mean placing a queued job, restoring a checkpoint on another backend,
-or routing inference to a compatible endpoint. It does not mean live migration of
-arbitrary GPU memory. Regional/provider allowlists, hourly and total spend limits,
-concurrency limits, queue wait policy and interruption tolerance belong in the
-policy. Current eligibility tests do not implement the atomic reservation or the
-actual fencing mechanism; both must exist before an automatic submitter is enabled.
+Kubernetes/Kueue is an optional local-pool integration in either mode. Account
+ownership is unrelated to whether a GPU pool needs a cluster. An unconnected
+user is not required to install the hosted platform.
 
-Consumption and contribution are independent. Enabling overflow never rents the
-owner's GPUs to others. An optional contribution service needs separate enrollment,
-reserved local capacity, availability windows, isolation, metering and reclaim
-notices. Theta is an optional supplier/operator integration, not a requirement for
-local operation. Blockchains or token rewards are not prerequisites for these functions.
+## Public boundary
 
-`protocol/backend.tsp` is the public contract source. Hosted consumers import a
-specific revision with recorded hashes. Independent copies must not evolve without
-a protocol revision and conformance checks. Experimental contracts can change;
-published stable contracts will require explicit migration compatibility.
+Keep local inventory, engine connectors, local execution/recovery receipts,
+interruption handling, optional pool integration, minimal local UI and the thin
+account-connection client here. Keep tests and necessary build/install tooling.
+Do not bundle engines or weights in the starter.
+
+Supplier backends and budget/overflow decisions have moved out. Existing backend
+provider identifiers remain in the shared envelope to preserve compatibility,
+but there is no Vast, Runpod or Theta implementation in this package. No provider
+credential is required. Protocol identifiers are not enabled capabilities.
+
+## Authority and disconnection
+
+The local owner chooses permitted engines, GPU allocation, filesystem locations,
+workload recipes, availability and remote control. Pairing does not authorize
+arbitrary remote shell commands, data upload, spending or capacity contribution.
+Future commands must bind site, project, execution ID, revision, expiry and retry
+identity; only explicitly installed/approved recipes may be remotely launched.
+The agent rejects replay, stale generations and mismatched scopes.
+
+Local execution receipts survive a lost connection. Accepted local work follows
+its local policy; a website outage must not turn it into paid cloud work. Revoke
+disables future hosted commands, while the owner retains local cancellation.
+Account tokens stay in the OS credential store. The local engine or Docker socket
+must not be exposed through an unrestricted web tunnel.
+
+## Current implementation versus target
+
+Implemented: the dependency-free starter, optional outbound scoped enrollment and
+recoverable renewal, interruption protocol and Linux file exchange, durable local
+receipt store, offline simulator and optional Kubernetes/Kueue execution/reclaim.
+
+Pending: browser/device login, authenticated continuous command transport,
+standalone job supervision and engine submission/recovery, minimal local console,
+signed installers/updater, measured optional-download manifest, multi-host
+standalone coordination and hardware qualification of cluster setup.
+
+Reuse upstream engines and schedulers. Do not implement a second generic GPU
+scheduler or suggest multiple devices provide transparent combined VRAM.

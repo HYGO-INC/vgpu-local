@@ -928,63 +928,6 @@
           "not": {}
         }
       },
-      "BurstPolicy": {
-        "type": "object",
-        "required": [
-          "mode",
-          "allowed_providers",
-          "allowed_regions",
-          "max_hourly_price_microusd",
-          "max_total_spend_microusd",
-          "max_concurrent_remote_jobs",
-          "local_wait_seconds",
-          "data_policy"
-        ],
-        "properties": {
-          "mode": {
-            "type": "string",
-            "enum": [
-              "disabled",
-              "manual",
-              "automatic"
-            ]
-          },
-          "allowed_providers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BackendProvider"
-            }
-          },
-          "allowed_regions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "max_hourly_price_microusd": {
-            "$ref": "#/components/schemas/NonnegativeInteger"
-          },
-          "max_total_spend_microusd": {
-            "$ref": "#/components/schemas/NonnegativeInteger"
-          },
-          "max_concurrent_remote_jobs": {
-            "$ref": "#/components/schemas/NonnegativeInteger"
-          },
-          "local_wait_seconds": {
-            "$ref": "#/components/schemas/NonnegativeInteger"
-          },
-          "data_policy": {
-            "type": "string",
-            "enum": [
-              "local_only",
-              "artifacts_only"
-            ]
-          }
-        },
-        "unevaluatedProperties": {
-          "not": {}
-        }
-      },
       "Interruption": {
         "type": "object",
         "required": [

@@ -1,126 +1,115 @@
 # vgpu-local
 
-Open-source tools for GPU pools at home, in an office, or in a private cloud,
-with an optional connection to vgpu.com for additional capacity.
+A small open-source runtime for using **your own GPUs** at home, in an office,
+or in a private cloud. Optional vgpu.com management does not change where the
+work runs. A vgpu.com account and Kubernetes are both optional.
 
-**Status: experimental engineering foundation.** Local inventory, native queued
-job submission, provider adapters, an offline fault simulator, scoped cloud
-enrollment/renewal, and a native interruption controller/file transport are
-implemented. Automatic overflow execution, the local console and capacity
-contribution still require integration and qualification.
+**Status: experimental.** The starter inspects this computer and existing local
+engines. Optional modules support account enrollment, interruption exchange and
+Kubernetes/Kueue execution. Browser pairing, the local console and managed job
+dispatch to a standalone computer are still being built.
 
-**Release timing:** public release is planned for when the vgpu.com site is ready.
-Development stays local while the remote's visibility does not match that policy;
-no new code, packages, images or releases should be published before then.
+**Release timing:** public release is planned for when vgpu.com is ready. Current
+development stays local; no new packages, images or releases are published yet.
 
-Local tools require no vgpu.com login or private packages. Importing the library,
-rendering jobs and running the tests make no provider calls. Live cluster access
-requires an explicit kubeconfig context; provider SDK calls require credentials.
+## Start with the minimum download
 
-## Try it without a GPU or cloud account
-
-Install Python 3.12 and [uv](https://docs.astral.sh/uv/), then:
+From this checkout, with Python 3.12+ and [uv](https://docs.astral.sh/uv/):
 
 ```sh
-git clone https://github.com/HYGO-INC/vgpu-local.git
-cd vgpu-local
-uv sync --locked
-uv run vgpu-local inventory --nodes-json examples/nodes.json
-uv run vgpu-local capabilities runpod
-uv run vgpu-local render-job --name gpu-check --image nvidia/cuda:12.8.1-base-ubuntu22.04 -- nvidia-smi
+uv tool install .
+vgpu-local doctor
 ```
 
-The sample inventory includes 4090, 5090 and MIG resources. It is fixture data,
-not a hardware test. Rendering emits a suspended Kubernetes Job; it does not
-start a container. Choose and pin a workload image qualified for your actual GPU.
+The default package has **no third-party runtime dependencies**. It does not
+install Kubernetes, Docker, PyTorch, CUDA, models, provider SDKs, a database server
+or a desktop browser. Python itself is a prerequisite and is not included in the
+package-size measurement. `doctor` invokes an installed `nvidia-smi` when available;
+`doctor --no-probe` skips that invocation. It makes no network requests.
 
-For a real site, follow [local setup](docs/local-setup.md). With a configured
-Kubernetes/K3s cluster, NVIDIA device allocation and Kueue:
+If an engine is already running on this computer, inspect it without installing
+another copy or pulling a model:
 
 ```sh
-uv run vgpu-local inventory --context my-local-cluster
-uv run vgpu-local submit-job --context my-local-cluster --name gpu-check --image nvidia/cuda:12.8.1-base-ubuntu22.04 -- nvidia-smi
+vgpu-local engine status --kind comfyui --endpoint http://127.0.0.1:8188
+vgpu-local engine status --kind ollama --endpoint http://127.0.0.1:11434
+vgpu-local engine status --kind vllm --endpoint http://127.0.0.1:8000
 ```
 
-`submit-job` checks that the named LocalQueue exists and uses `kubectl create`.
-Kueue admits the suspended Job. A timeout or an already-existing job must be
-reconciled by its name before issuing a new submission; no automatic resubmit is
-performed. This tool uses your selected kubeconfig permissions.
+These read-only probes recognize the API response, not successful GPU inference.
+Choose an engine/model only when needed; drivers and model weights may still be
+substantial downloads. Signed native installers and browser-guided optional
+downloads are planned, not already distributed.
 
-## Pooling and partitioning
+## Two ways to use the same local runtime
 
-- Pool GPUs across hosts for jobs and replicas using Kubernetes and Kueue.
-- Run larger models through application-supported partitioning. Pooling cards
-  does not create a GPU with transparently combined VRAM.
-- Request an existing MIG resource with `--gpu-resource nvidia.com/mig-1g.10gb`.
-  MIG profiles must already exist on supported hardware.
-- Qualify software sharing for trusted workloads separately. Neither time slicing
-  nor a software memory quota promises hardware tenant isolation.
+| Mode | Management | Work runs on | Kubernetes |
+|---|---|---|---|
+| Standalone | Local CLI; local console planned | Your GPUs | Optional |
+| Connected | vgpu.com account/dashboard; dispatch integration planned | Your GPUs | Optional |
 
-Inventory reports **allocatable resources, not currently free GPUs**. Kubernetes
-owns placement and admission. Multiple consumer cards and supported enterprise
-partitions can coexist in a site without pretending they have identical capabilities.
+Connecting never enables paid rentals, data export or renting your GPUs to others.
+Standalone mode does not require the hosted platform's account, billing,
+database or orchestration services. See [architecture](docs/architecture.md).
 
-The [Kueue execution adapter](docs/kubernetes-backend.md) now implements the backend
-lifecycle with durable create receipts, Job UID adoption and conditional cleanup.
-Its `kubernetes init/provision/observe/release` commands use an explicit site
-configuration and retained local journal without a cloud login. Use them when
-you need recoverable operation instead of direct `submit-job` convenience.
-Its failure cases and official client models are tested offline; live GPU-cluster
-qualification remains required.
-The [local reclaim command](docs/interruptions.md#local-kubernetes-reclaim)
-connects native notice readiness/deadlines to that same backend and keeps the
-notice pending through failed teardown or retained pods. It is one reconciliation
-step for the local owner, not a deployed agent or a hardware fence.
+Install extras only for features you choose:
 
-`--gpus N` requests N devices on **one worker**, even if the cluster has many
-workers. Distributed JobSets, HAMi sharing setup, DRA claims, VM pass-through and
-multi-GPU video recipes remain planned. See the [support matrix and engine choices](docs/gpu-modes.md).
+```sh
+# From the checkout; retain already chosen extras when changing this selection.
+uv tool install --reinstall '.[cloud]'
+# Existing cluster support; optionally combined as '.[cloud,kubernetes]'.
+uv tool install --reinstall '.[kubernetes]'
+```
 
-## Providers and overflow
+- `cloud`: scoped outbound enrollment and credential renewal; see
+  [cloud connection](docs/cloud-connection.md). Interactive browser login is pending.
+- `control`: durable interruption notices and acknowledgements; see
+  [interruption exchange](docs/interruptions.md).
+- `kubernetes`: existing Kubernetes/Kueue integration. It installs the Python
+  client, **not a cluster**, drivers or GPU allocator. See [optional cluster setup](docs/local-setup.md).
 
-The [pinned FastVideo recipe](recipes/fastvideo/README.md) has passed a small
-single-4090 video qualification, with cold-load time, warm generation time and
-memory measured separately. It is independent of the cloud adapters and does not
-claim long-video or multi-GPU qualification.
+## Optional GPU pools
 
-The [pinned FramePack recipe](recipes/framepack/README.md) also produced a decoded
-short clip on the 4090. It took 11.1 minutes and caused substantial host-memory
-pressure. Its recorded result is not an unattended-service recommendation.
+Cluster integration inventories allocatable resources and queues jobs needing
+one or more GPUs on one worker. Existing MIG resource names are supported.
+It does not merge VRAM across cards. Kubernetes/Kueue owns cluster scheduling;
+there is no competing GPU scheduler here.
 
-The Python library includes Vast/Runpod adapters through SkyPilot and a Theta
-GPU Node API v1 client. These are tested with injected SDK/HTTP transports;
-live supplier qualification is still pending. See [provider boundaries](docs/providers.md).
+The [recoverable cluster backend](docs/kubernetes-backend.md) retains create
+receipts, adopts identified Jobs after lost replies and waits for pod teardown.
+The [reclaim command](docs/interruptions.md#local-kubernetes-reclaim) connects
+workload readiness/deadlines to cleanup. These paths have offline and client-model
+tests; actual GPU-cluster installation remains unqualified.
 
-`examples/local-only.json` disables cloud use. The overflow policy library checks
-budgets, regions, allowed providers, data-export readiness and local execution
-fencing. It is an eligibility check, **not an automatic submitter or an atomic
-spending reservation**. The separate [cloud connection](docs/cloud-connection.md)
-enrolls and renews a scoped installation without enabling spending or contribution.
-See [architecture and remaining work](docs/architecture.md).
+HAMi setup, multi-node jobs, DRA and VM integration remain optional future work.
+See [GPU modes](docs/gpu-modes.md). A single computer does not need any of these.
 
-The [interruption protocol](docs/interruptions.md) provides versioned warnings,
-acknowledgement/readiness receipts, cancellation, explicit extension grants and a
-Linux file channel, with `vgpu-local interruption` commands for the operator relay
-and workload responses. Reclamation and billing remain external authority boundaries.
+## Optional workload recipes
+
+Recipes are separate development artifacts, not starter dependencies:
+
+- [FastVideo](recipes/fastvideo/README.md): two short clips measured on a 4090.
+- [FramePack](recipes/framepack/README.md): a short clip passed with substantial
+  host-memory pressure; read its measured requirements before running.
+- [LongLive](recipes/longlive/README.md): two short clips passed; the longer run
+  failed frame-count qualification and is not a supported long-video recipe.
+
+No supplier adapters, spending policy or hosted financial services are included.
+Optional cloud capacity is a separate service-side concern.
 
 ## Development
 
 ```sh
-# Node version: .node-version; pnpm version: package.json
 pnpm install --frozen-lockfile
 uv sync --locked
 pnpm check
+uv build --wheel
 ```
 
-Edit `protocol/backend.tsp`, `federation.tsp` or `interruptions.tsp`, then `pnpm generate`. TypeSpec generates OpenAPI 3.1,
-JSON Schema, TypeScript types and Python models. A common fixture set is checked
-against JSON Schema, Ajv and Python/Pydantic. Generated files must remain in sync.
-The protocol is experimental and defines no deployed HTTP routes.
+Development tooling is larger than the end-user installation. Edit public
+contracts in `protocol/*.tsp`, run `pnpm generate`, and retain the cross-language
+fixtures. The common backend envelope retains existing provider identifiers for
+wire compatibility; those identifiers do not install or implement supplier code.
+Hosted spending policy is not part of this package.
 
-Tests cover durable operation receipts, concurrent creates, lost replies,
-preemption with/without warning, stale observations, failed teardown, duplicate
-delivery and overflow restrictions. They require neither GPUs nor paid services.
-
-Apache-2.0. This repository contains the public local product; it does not require
-the hosted service's source, commercial settings or account infrastructure.
+Apache-2.0. Local use needs no private repository or package registry.

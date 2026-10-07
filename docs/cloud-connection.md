@@ -1,5 +1,10 @@
 # Optional cloud connection
 
+Install the `vgpu-local[cloud]` extra only when choosing connected mode. It adds
+the HTTP client, schema validation and OS credential-store support; it adds no
+Kubernetes dependency. Connection is for management of the owner's local GPUs.
+The initial dependency-free package and standalone use remain independent.
+
 `vgpu-local cloud connect` enrolls this installation in one cloud project. It
 uses outbound HTTPS only. Local operation does not require this command or any
 account. Enrollment enables neither paid overflow nor contribution of local GPUs.
@@ -53,6 +58,6 @@ retryable. The cloud-side owner's revoke API can revoke the site when its key is
 lost. Responses and redirects cannot choose a different scope or forward tokens.
 HTTP is accepted only on numeric loopback addresses for integration tests.
 
-Actual overflow still requires durable local admission fencing, immutable artifact
-grants, server-side spending reservations and recovery of remote jobs while a site
-is offline. Connection is not evidence those features are implemented.
+Browser pairing and authenticated job dispatch remain separate integration work.
+This connection implementation does not start local jobs from the website or
+provide automatic cloud overflow.

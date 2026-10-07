@@ -1219,42 +1219,60 @@ wheels = [
 name = "vgpu-local"
 version = "0.1.0a0"
 source = { editable = "." }
-dependencies = [
+
+[package.optional-dependencies]
+cloud = [
     { name = "filelock" },
     { name = "httpx" },
-    { name = "jsonschema" },
     { name = "keyring" },
     { name = "pydantic" },
     { name = "rfc8785" },
 ]
-
-[package.optional-dependencies]
+control = [
+    { name = "filelock" },
+    { name = "pydantic" },
+    { name = "rfc8785" },
+]
 kubernetes = [
+    { name = "filelock" },
     { name = "kubernetes" },
+    { name = "pydantic" },
+    { name = "rfc8785" },
 ]
 
 [package.dev-dependencies]
 dev = [
     { name = "datamodel-code-generator", extra = ["black", "isort"] },
+    { name = "filelock" },
+    { name = "httpx" },
+    { name = "jsonschema" },
+    { name = "keyring" },
     { name = "pytest" },
+    { name = "rfc8785" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "filelock", specifier = "==4.0.12" },
-    { name = "httpx", specifier = "==0.28.1" },
-    { name = "jsonschema", specifier = "==4.26.0" },
-    { name = "keyring", specifier = "==25.7.0" },
+    { name = "filelock", marker = "extra == 'control'", specifier = "==4.0.12" },
+    { name = "httpx", marker = "extra == 'cloud'", specifier = "==0.28.1" },
+    { name = "keyring", marker = "extra == 'cloud'", specifier = "==25.7.0" },
     { name = "kubernetes", marker = "extra == 'kubernetes'", specifier = "==35.0.0" },
-    { name = "pydantic", specifier = "==2.13.5" },
-    { name = "rfc8785", specifier = "==0.1.4" },
+    { name = "pydantic", marker = "extra == 'control'", specifier = "==2.13.5" },
+    { name = "rfc8785", marker = "extra == 'control'", specifier = "==0.1.4" },
+    { name = "vgpu-local", extras = ["control"], marker = "extra == 'cloud'" },
+    { name = "vgpu-local", extras = ["control"], marker = "extra == 'kubernetes'" },
 ]
-provides-extras = ["kubernetes"]
+provides-extras = ["control", "cloud", "kubernetes"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "datamodel-code-generator", extras = ["black", "isort"], specifier = "==0.83.0" },
+    { name = "filelock", specifier = "==4.0.12" },
+    { name = "httpx", specifier = "==0.28.1" },
+    { name = "jsonschema", specifier = "==4.26.0" },
+    { name = "keyring", specifier = "==25.7.0" },
     { name = "pytest", specifier = "==8.4.2" },
+    { name = "rfc8785", specifier = "==0.1.4" },
 ]
 
 [[package]]

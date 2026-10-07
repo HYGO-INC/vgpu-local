@@ -90,22 +90,6 @@ class BackendRequest(ContractModel):
     command: list[str] = Field(..., min_length=1)
 
 
-class BurstPolicy(ContractModel):
-    model_config = ConfigDict(
-        extra='forbid',
-    )
-    mode: Literal['disabled', 'manual', 'automatic']
-    allowed_providers: list[
-        Literal['vast', 'runpod', 'theta', 'kubernetes', 'simulator']
-    ]
-    allowed_regions: list[str]
-    max_hourly_price_microusd: int = Field(..., ge=0, le=9007199254740991)
-    max_total_spend_microusd: int = Field(..., ge=0, le=9007199254740991)
-    max_concurrent_remote_jobs: int = Field(..., ge=0, le=9007199254740991)
-    local_wait_seconds: int = Field(..., ge=0, le=9007199254740991)
-    data_policy: Literal['local_only', 'artifacts_only']
-
-
 class InterruptionScope(ContractModel):
     model_config = ConfigDict(
         extra='forbid',

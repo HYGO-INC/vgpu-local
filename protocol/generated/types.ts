@@ -142,18 +142,6 @@ export interface components {
             /** @enum {string} */
             state: "queued" | "running" | "succeeded" | "failed" | "canceled" | "unknown";
         };
-        BurstPolicy: {
-            /** @enum {string} */
-            mode: "disabled" | "manual" | "automatic";
-            allowed_providers: components["schemas"]["BackendProvider"][];
-            allowed_regions: string[];
-            max_hourly_price_microusd: components["schemas"]["NonnegativeInteger"];
-            max_total_spend_microusd: components["schemas"]["NonnegativeInteger"];
-            max_concurrent_remote_jobs: components["schemas"]["NonnegativeInteger"];
-            local_wait_seconds: components["schemas"]["NonnegativeInteger"];
-            /** @enum {string} */
-            data_policy: "local_only" | "artifacts_only";
-        };
         Interruption: {
             /** @enum {number} */
             schema_version: 1;

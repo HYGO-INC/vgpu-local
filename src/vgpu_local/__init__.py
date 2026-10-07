@@ -1,1 +1,1 @@
-"""Local GPU tools and provider adapters. No cloud activity occurs on import."""
+"""Local GPU runtime. Optional services are never loaded or contacted on import."""
