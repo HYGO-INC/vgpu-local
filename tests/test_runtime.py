@@ -12,7 +12,7 @@ from vgpu_local.runtime import Runtime
 from vgpu_local.runtime_config import load
 from vgpu_local.runtime_server import application
 from vgpu_local.runtime_store import RuntimeStore
-from runtime_fixture import EngineFixture, PROMPT, service, setup, submit, wait_for
+from runtime_fixture import EngineFixture, PROMPT, service, setup, submit, wait_for, crash_runtime
 from test_cloud import Secrets, connected
 
 SCOPE = {"tenant_id": "ten_example0", "project_id": "prj_example0", "site_id": "sit_"+"a"*32}
@@ -165,8 +165,11 @@ def test_real_process_restart_adopts_lost_submit_reply_and_retains_result(tmp_pa
         with service(path) as (info, process):
             c = submit(info)
             wait_for(lambda: engine.posts == 1)
-            process.kill(); process.wait(timeout=10)
+            crashed_pid = info["pid"]
+            crash_runtime(info, process)
         with service(path):
+            from vgpu_local.runtime_cli import running
+            assert running(path)["pid"] != crashed_pid
             wait_for(lambda: store.job(c["execution_id"])["state"] == "running")
             job = store.job(c["execution_id"])
             engine.finish(job["engine_job_id"])

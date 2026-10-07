@@ -26,6 +26,44 @@ def wait_for(check, timeout=15):
     raise AssertionError("condition did not become true")
 
 
+def listener_addresses(pid, port):
+    """Inspect the actual OS listener owned by this qualification process."""
+    if sys.platform == "win32":
+        script = (f"@(Get-NetTCPConnection -OwningProcess {int(pid)} -State Listen -LocalPort {int(port)} "
+                  "| Select-Object -ExpandProperty LocalAddress) | ConvertTo-Json -Compress")
+        value = json.loads(subprocess.check_output(["powershell", "-NoProfile", "-Command", script],
+                            text=True, creationflags=subprocess.CREATE_NO_WINDOW, timeout=15))
+        return value if isinstance(value, list) else [value]
+    if sys.platform.startswith("linux"):
+        import os
+        import socket
+        inodes = set()
+        for p in Path(f"/proc/{int(pid)}/fd").iterdir():
+            try: target = os.readlink(p)
+            except FileNotFoundError: continue
+            if target.startswith("socket:["): inodes.add(target[8:-1])
+        addresses = []
+        for name, family in (("tcp", socket.AF_INET), ("tcp6", socket.AF_INET6)):
+            for line in Path(f"/proc/{int(pid)}/net/{name}").read_text().splitlines()[1:]:
+                fields = line.split()
+                address, bound_port = fields[1].split(":")
+                if fields[3] == "0A" and int(bound_port, 16) == port and fields[9] in inodes:
+                    packed = bytes.fromhex(address)
+                    packed = b"".join(packed[i:i+4][::-1] for i in range(0, len(packed), 4))
+                    addresses.append(socket.inet_ntop(family, packed))
+        return addresses
+    raise RuntimeError("listener inspection not implemented for this qualification platform")
+
+
+def crash_runtime(info, launcher):
+    import os
+    import signal
+    # Windows venv python.exe is a redirector: its PID differs from the server.
+    # Kill only the runtime identified in this test's private, freshly created state.
+    os.kill(info["pid"], signal.SIGTERM if sys.platform == "win32" else signal.SIGKILL)
+    launcher.wait(timeout=10)
+
+
 class EngineFixture:
     def __init__(self):
         self.jobs, self.history, self.posts = {}, {}, 0

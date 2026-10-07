@@ -9,7 +9,7 @@ from playwright.sync_api import sync_playwright, Error as BrowserError
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tests"))
-from runtime_fixture import EngineFixture, service, setup, wait_for
+from runtime_fixture import EngineFixture, service, setup, wait_for, listener_addresses
 
 
 def main():
@@ -22,6 +22,8 @@ def main():
         path = Path(temporary) / "runtime"
         store = setup(path, engine)
         with service(path) as (info, process), sync_playwright() as playwright:
+            addresses = listener_addresses(info["pid"], int(info["origin"].rsplit(":", 1)[1]))
+            assert addresses == ["127.0.0.1"], addresses
             launch = dict(executable_path=str(args.chrome.resolve()), headless=True)
             browser = playwright.chromium.launch(**launch)
             version = browser.version
@@ -82,7 +84,7 @@ def main():
                 remote.close()
                 evidence = {"chrome": version, "engine": "controlled ComfyUI wire fixture; no GPU execution",
                     "all_browser_processes_closed_while_running": True, "same_execution_and_result_after_reopen": True,
-                    "engine_submissions": engine.posts, "listener_host": info["origin"].split(":")[1].lstrip("/"),
+                    "engine_submissions": engine.posts, "os_listener_addresses": addresses,
                     "hosted_fixture_permissions_denied": permissions, "hosted_fixture_requests": len(requests),
                     "hosted_fixture_loopback_requests": 0, "production_hosted_ui_qualified": False}
                 (args.output / "browser.json").write_text(json.dumps(evidence, indent=2)+"\n", encoding="utf-8")

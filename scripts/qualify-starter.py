@@ -30,6 +30,8 @@ def main():
         assert not result["account_required"] and not result["kubernetes_required"] and not result["downloads_started"]
         optional = subprocess.run([*command, "cloud", "status"], capture_output=True, text=True)
         assert optional.returncode == 2 and "vgpu-local[cloud]" in optional.stderr
+        optional_runtime = subprocess.run([*command, "runtime", "status"], capture_output=True, text=True)
+        assert optional_runtime.returncode == 2 and "vgpu-local[runtime]" in optional_runtime.stderr
         print(json.dumps({"wheel": wheel.name, "bytes": wheel.stat().st_size,
                           "sha256": hashlib.sha256(wheel.read_bytes()).hexdigest(),
                           "installed_distributions": installed,

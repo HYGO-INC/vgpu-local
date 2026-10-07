@@ -3,6 +3,7 @@ import asyncio
 from contextlib import asynccontextmanager
 import hmac
 import json
+import os
 from pathlib import Path
 import secrets
 import socket
@@ -154,7 +155,7 @@ def serve(path, *, port=0):
                           shutdown=lambda: setattr(server, "should_exit", True))
         server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=listener.getsockname()[1],
                                 access_log=False, log_level="warning", proxy_headers=False, ws="none"))
-        write_private(path / "running.json", {"origin": origin, "token": token})
+        write_private(path / "running.json", {"origin": origin, "token": token, "pid": os.getpid()})
         server.run(sockets=[listener])
     finally:
         listener.close()
