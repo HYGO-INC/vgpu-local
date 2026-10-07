@@ -26,6 +26,9 @@ def register(commands):
             command.add_argument("--id", required=True)
             command.add_argument("--title", required=True)
             command.add_argument("--workflow", type=Path, required=True, help="Owner-approved ComfyUI API-format JSON")
+    autostart = sub.add_parser("autostart", help="Optional start at login; off unless enabled")
+    autostart.add_argument("mode", choices=("enable", "disable", "status"))
+    autostart.add_argument("--state", type=Path, default=DEFAULT_STATE)
 
 
 def running(path):
@@ -52,6 +55,13 @@ def request(path, method="GET", suffix="/api/status"):
 def run(args):
     path = args.state.resolve()
     if args.runtime_action == "init": return initialize(path, args.engine, cloud_config=args.cloud_config)
+    if args.runtime_action == "autostart":
+        from .autostart import for_platform
+        backend = for_platform()
+        if args.mode == "enable":
+            load(path)  # only an initialized runtime is started at login
+            return backend.enable(path)
+        return backend.disable() if args.mode == "disable" else backend.status()
     load(path)
     if args.runtime_action == "add-recipe":
         if args.workflow.stat().st_size > 1_000_000: raise ValueError("workflow_too_large")

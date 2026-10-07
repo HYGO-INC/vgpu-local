@@ -29,8 +29,18 @@ Do not share that directory or launch URL. Local privileged processes remain tru
 
 The same job continues when every browser closes. `runtime stop` stops the control
 program, not ComfyUI or its jobs. Starting again reconciles their saved identities.
-The computer and engine must remain running. Automatic start after login/reboot,
-model checkpoint restoration and engine restart recovery are separate features.
+The computer and engine must remain running. Model checkpoint restoration and
+engine restart recovery are separate features.
+
+## Optional start at login
+
+Off by default. `vgpu-local runtime autostart enable` starts the runtime each time
+you sign in; `disable` removes it and `status` shows whether it is set. It uses your
+own account's startup mechanism, so no administrator rights are needed: a Run
+registry entry on Windows (launched without a console window), a systemd user
+service on Linux and a launchd agent on macOS. The runtime's lock still allows one
+instance per state folder, so a manual `runtime start` alongside it is harmless.
+It starts only this control program; ComfyUI or other engines need their own setup.
 
 ## Results and recovery
 
