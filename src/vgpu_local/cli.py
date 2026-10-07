@@ -48,10 +48,11 @@ def main():
         connection = cloud_commands.add_parser(name)
         connection.add_argument("--config", type=Path, default=Path.home() / ".config/vgpu-local/cloud.json")
         if name == "connect":
-            connection.add_argument("--endpoint", required=True)
-            connection.add_argument("--tenant", required=True)
-            connection.add_argument("--project", required=True)
+            connection.add_argument("--endpoint", default="https://vgpu.com")
+            connection.add_argument("--tenant", help="Legacy manual enrollment only")
+            connection.add_argument("--project", help="Legacy manual enrollment only")
             connection.add_argument("--name", required=True)
+            connection.add_argument("--restart", action="store_true", help="Explicitly replace an unfinished device request; never an enrolled connection")
     for name in ("render-job", "submit-job"):
         job = commands.add_parser(name, help="Create a suspended job admitted by your installed Kueue")
         job.add_argument("--name", required=True)
@@ -83,8 +84,17 @@ def main():
             from .cloud import CloudConnection, SystemKeyring
             client = CloudConnection(args.config, SystemKeyring())
             if args.cloud_action == "connect":
-                result = client.connect(endpoint=args.endpoint, tenant_id=args.tenant, project_id=args.project,
-                                        name=args.name, user_access_token=os.environ.get("VGPU_USER_ACCESS_TOKEN", ""))
+                if args.tenant or args.project:
+                    if not args.tenant or not args.project or args.restart:
+                        raise ValueError("manual_enrollment_requires_tenant_and_project_without_restart")
+                    result = client.connect(endpoint=args.endpoint, tenant_id=args.tenant, project_id=args.project,
+                                            name=args.name, user_access_token=os.environ.get("VGPU_USER_ACCESS_TOKEN", ""))
+                else:
+                    from .device import DeviceConnection
+                    def announce(url, code):
+                        print(f"Open {url} and enter {code}. Match this code and choose your project.", file=sys.stderr, flush=True)
+                    result = DeviceConnection(client).connect(endpoint=args.endpoint, name=args.name,
+                                                              announce=announce, restart=args.restart)
             elif args.cloud_action == "status":
                 result = client.status()
             elif args.cloud_action == "renew":
@@ -120,6 +130,8 @@ def main():
                                 input=json.dumps(result), text=True, check=True, timeout=30)
                 return
         print(json.dumps(result, indent=2))
+    except KeyboardInterrupt:
+        parser.exit(130, "Command interrupted. Rerun the same connection command to resume.\n")
     except ModuleNotFoundError:
         extra = args.action if args.action in {"cloud", "runtime"} else "control"
         parser.exit(2, f"Install the optional vgpu-local[{extra}] extra for this command.\n")

@@ -10,17 +10,26 @@ uses outbound HTTPS only. Local operation does not require this command or any
 account. Enrollment enables neither paid overflow nor contribution of local GPUs.
 No kubeconfig, local file, dataset or provider credential is uploaded.
 
-Set `VGPU_USER_ACCESS_TOKEN` in the process environment from your authenticated
-session; do not put it in a command argument or commit it. A browser/device login
-flow is not yet integrated. Use an explicitly configured endpoint; this does not
-claim the vgpu.com production API is deployed.
+Run the command, open the displayed link on any browser, and enter the code.
+Confirm that the code matches your GPU machine, sign in, and select its project.
+Machine names are self-reported; never approve a code sent by someone else. The
+website makes no inbound connection to the GPU machine. No token copying,
+Kubernetes, browser on the GPU server, or open browser tab is required.
 
 ```text
-vgpu-local cloud connect --endpoint https://your-cloud-origin --tenant ten_example0 --project prj_example0 --name Office
+vgpu-local cloud connect --name Office
 vgpu-local cloud status
 vgpu-local cloud renew
 vgpu-local cloud disconnect
 ```
+
+The default origin is `https://vgpu.com`; `--endpoint` selects a separately
+configured service. The local implementation does not mean the production
+website/API has been deployed. The optional client implements RFC 8628; it uses
+an enrollment-only grant, never stores your account session, and receives no
+refresh token. Existing manual automation can still supply BOTH `--tenant` and
+`--project` and `VGPU_USER_ACCESS_TOKEN` in its environment. This is an explicit
+legacy path, not a requirement for device login.
 
 The CLI generates a random site credential and saves it in the OS credential
 store before sending enrollment. Supported stores are Windows Credential Manager,
@@ -31,14 +40,31 @@ contains only the origin, scope, site ID and name. Changing its origin/scope doe
 not cause the existing credential to be sent elsewhere. Temporary renewal state
 also stays in the OS credential store, never this metadata file.
 
-If enrollment times out, retry the same command/config after refreshing the user
-session if needed. The same site ID and key are reused. Enrollment replay never
-extends credential validity. The server sets expiration; expired or revoked sites
-cannot authenticate status calls. A connected background runtime checks on startup
-and every hour, renewing active credentials with at most one day left. If you use
-only the cloud CLI, use `cloud renew` before expiry. An expired/revoked connection requires
-user-authorized enrollment with a new configuration. `connect` replays initial
-enrollment; use `status`/`renew` to manage an already renewed connection.
+If connection is interrupted, rerun the same command. The pending device code,
+polling delay and enrollment grant live in the OS credential store. Polling
+honors the server interval, adds five seconds after each `slow_down`, and backs
+off after network timeouts. Denial, expiry and other terminal errors stop it.
+An explicitly requested `--restart` replaces only an unfinished request, and
+cannot overwrite an existing connection file or reassign pending runtime reports.
+
+Final enrollment saves the scoped site key and metadata before its request. After
+a lost reply, rerunning checks the site's status with that key, even if its
+short-lived enrollment grant has expired. A lost *token* reply is different:
+the server may consume the device code and revoke its grant on replay. The client
+then stops and requires an explicit restart; it never loops into new approvals.
+If the grant expires after metadata was saved but BEFORE enrollment committed,
+the client preserves that configuration. It refuses to replace it automatically;
+use a new `--config` for a fresh explicit pairing and leave any runtime pinned to
+the old identity unchanged. A logged-out/inactive approval session requires sign-in
+again on the approval page.
+
+Enrollment replay never extends credential validity. The server sets expiration;
+expired or revoked sites cannot authenticate status calls. A connected background
+runtime checks on startup and every hour, renewing active credentials with at most
+one day left. If you use only the cloud CLI, use `cloud renew` before expiry.
+An expired/revoked connection requires explicit enrollment with a new configuration.
+Use `status`/`renew` to manage an already connected machine. Successful device
+enrollment discards its temporary OAuth state, retaining only the site key.
 
 Renewal saves the old credential, replacement and random retry identity together
 in one OS credential entry before the request. Retry `cloud renew` after response
@@ -65,5 +91,5 @@ lost. Responses and redirects cannot choose a different scope or forward tokens.
 HTTP is accepted only on numeric loopback addresses for integration tests.
 
 The optional [background runtime](local-runtime.md) exchanges authenticated recipe
-commands with the account API. Browser pairing and the production website dashboard
+commands with the account API. The production website login/dashboard
 remain separate integration work. This connection does not provide cloud overflow.

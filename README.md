@@ -76,7 +76,8 @@ uv tool install --python 3.12 --reinstall '.[kubernetes]'
 
 - `cloud`: scoped outbound enrollment and credential renewal (automatic while the
   connected runtime is running); see
-  [cloud connection](docs/cloud-connection.md). Interactive browser login is pending.
+  [cloud connection](docs/cloud-connection.md). Device login displays a code and a browser link;
+  production website integration is separate from the qualified local implementation.
 - `runtime`: detached local program, authenticated console and identified ComfyUI
   execution. Closing every browser does not cancel a job. See [runtime setup](docs/local-runtime.md).
 - `control`: durable interruption notices and acknowledgements; see
