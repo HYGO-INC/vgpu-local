@@ -9,6 +9,9 @@ both standalone and connected modes. Account connection is management only.
 Supplier adapters, spending/overflow decisions, financial services and hosted
 business logic belong in private vgpu. Public code contains only local runtime,
 necessary optional integrations, public contracts/client and their tooling.
+Both management modes share browser-independent execution. Serve the standalone
+console/API from one explicitly bound loopback origin; connected management uses
+outbound agent requests. Never interpret a closed tab as a cancellation command.
 
 Release rule: public only when the vgpu.com site is ready. Until then the
 repository is intended to be private. If the remote is still public, keep work

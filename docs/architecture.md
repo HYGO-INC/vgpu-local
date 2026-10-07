@@ -25,6 +25,35 @@ Kubernetes/Kueue is an optional local-pool integration in either mode. Account
 ownership is unrelated to whether a GPU pool needs a cluster. An unconnected
 user is not required to install the hosted platform.
 
+## Browser-independent execution target
+
+The planned standalone console serves its assets and API from one explicitly
+bound `http://127.0.0.1:<port>` origin. It authenticates local control requests and
+validates Host/Origin; loopback alone is not authorization. No public website
+needs to connect into that listener.
+
+In connected mode, the browser uses the hosted HTTPS dashboard. The local agent
+receives commands through authenticated outbound HTTPS polling and reports results
+over the same boundary. Browser pairing must not introduce a required localhost
+callback. The optional local console remains available for local owner control.
+
+Both interfaces use one execution runtime, supervised independently of the
+browser. Upstream engines own execution and their native queues. Closing a tab,
+losing a WebSocket or going offline is not cancellation. Reopening an interface
+reads the same job's durable state. The computer and engine must remain running;
+sleep, power loss and engine failure require separate recovery behavior.
+
+Record submission intent before calling an engine, then retain its job identity
+and result. Reconcile lost replies and agent restarts without blindly submitting
+again. An unobservable job remains uncertain; missing history does not prove it
+never ran. Only an explicit, authorized, job-specific request cancels work.
+
+The console, supervised agent and engine dispatch are targets, not implemented
+features. Qualification must close all browser sessions during an execution,
+reconnect to the same result, lose network/submission replies and restart the
+agent without causing duplicate execution. Browser tests must also deny public
+loopback permission and confirm connected mode needs no such request.
+
 ## Public boundary
 
 Keep local inventory, engine connectors, local execution/recovery receipts,
