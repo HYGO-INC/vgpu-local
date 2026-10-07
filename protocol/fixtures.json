@@ -1136,7 +1136,8 @@
       "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
       "shell": "not-permitted"
-    }
+    },
+    "path": "/shell"
   },
   {
     "name": "local-command-no-expiry-null",
@@ -1154,7 +1155,8 @@
       "recipe_id": "video",
       "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29"
-    }
+    },
+    "path": "/expires_at"
   },
   {
     "name": "local-command-generation-positive",
@@ -1172,7 +1174,8 @@
       "recipe_id": "video",
       "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29"
-    }
+    },
+    "path": "/generation"
   },
   {
     "name": "local-receipt",
@@ -1193,7 +1196,8 @@
       "request_sha256": "f4ed988942a8430f7b69d36856a94bc3ec7bb88f8d76108dc0713a35e9f49f29",
       "accepted": true,
       "error_code": null
-    }
+    },
+    "path": "/error_code"
   },
   {
     "name": "local-command-status-pending",
@@ -1265,7 +1269,8 @@
       "recipe_id": "video",
       "recipe_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "outputs": {}
-    }
+    },
+    "path": "/outputs"
   },
   {
     "name": "local-exchange",
@@ -1404,7 +1409,8 @@
         }
       ],
       "reports": []
-    }
+    },
+    "path": "/receipts"
   },
   {
     "name": "local-exchange-response",
