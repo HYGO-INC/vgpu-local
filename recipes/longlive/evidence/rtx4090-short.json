@@ -1,0 +1,129 @@
+{
+  "lock": {
+    "schema_version": 1,
+    "base_image": "ghcr.io/hao-ai-lab/fastvideo/fastvideo-dev@sha256:b30fbb7013f965b52cbacc3a2316a4d8503d5fad3522bc5396ac627d1eea80b3",
+    "source": "https://github.com/NVlabs/LongLive.git",
+    "source_revision": "fb16a879f46e604df4a0ca48ce2bf45adfa90352",
+    "engine_directory": "LongLive1.0",
+    "models": [
+      {
+        "id": "Wan-AI/Wan2.1-T2V-1.3B",
+        "revision": "37ec512624d61f7aa208f7ea8140a131f93afc9a",
+        "directory": "wan_models/Wan2.1-T2V-1.3B",
+        "allow_patterns": [
+          "config.json",
+          "diffusion_pytorch_model.safetensors",
+          "models_t5_umt5-xxl-enc-bf16.pth",
+          "Wan2.1_VAE.pth",
+          "google/umt5-xxl/*"
+        ]
+      },
+      {
+        "id": "Efficient-Large-Model/LongLive-1.3B",
+        "revision": "cda9138d93872ef109d9a74c270184eb3a5acc6e",
+        "directory": "longlive_models",
+        "allow_patterns": [
+          "models/longlive_base.pt",
+          "models/lora.pt"
+        ]
+      }
+    ],
+    "seed": 20261006,
+    "prompt": "A small red wooden boat moves slowly across a calm mountain lake at sunrise. Gentle ripples spread across the water. Wide shot, stable camera, natural light.",
+    "fps": 16,
+    "width": 832,
+    "height": 480,
+    "denoising_steps": [
+      1000,
+      750,
+      500,
+      250
+    ],
+    "cpu_memory_gib": 28
+  },
+  "action": "benchmark",
+  "python": "3.12.15",
+  "versions": {
+    "torch": "2.12.0+cu126",
+    "torchvision": "0.27.0+cu126",
+    "diffusers": "0.40.0",
+    "transformers": "5.15.1",
+    "flash_attn": "2.8.3+cu126torch2.12",
+    "peft": "0.21.2",
+    "omegaconf": "2.4.0rc1",
+    "av": "19.0.0",
+    "easydict": "1.13",
+    "lmdb": "1.7.3"
+  },
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "total_gpu_bytes": 25756696576,
+  "config": {
+    "denoising_step_list": [
+      1000,
+      750,
+      500,
+      250
+    ],
+    "warp_denoising_step": true,
+    "num_frame_per_block": 3,
+    "model_name": "Wan2.1-T2V-1.3B",
+    "model_kwargs": {
+      "local_attn_size": 12,
+      "timestep_shift": 5.0,
+      "sink_size": 3,
+      "use_infinite_attention": true
+    },
+    "data_path": "longlive_models/prompts/vidprom_filtered_extended.txt",
+    "output_folder": "videos/long",
+    "inference_iter": -1,
+    "num_output_frames": 21,
+    "use_ema": false,
+    "seed": 20261006,
+    "num_samples": 1,
+    "save_with_index": true,
+    "global_sink": true,
+    "context_noise": 0,
+    "generator_ckpt": "longlive_models/models/longlive_base.pt",
+    "lora_ckpt": "longlive_models/models/lora.pt",
+    "adapter": {
+      "type": "lora",
+      "rank": 256,
+      "alpha": 256,
+      "dropout": 0.0,
+      "dtype": "bfloat16",
+      "verbose": false
+    }
+  },
+  "load_seconds": 80.7817784989602,
+  "latent_frames": 21,
+  "runs": [
+    {
+      "generation_seconds": 19.282061960955616,
+      "generation_and_save_seconds": 20.77276256098412,
+      "frames": 81,
+      "width": 832,
+      "height": 480,
+      "fps": 16.0,
+      "video_seconds": 5.0625,
+      "torch_peak_allocated_bytes": 11784214528,
+      "output": "run-1.mp4"
+    },
+    {
+      "generation_seconds": 17.869517338986043,
+      "generation_and_save_seconds": 19.28594816394616,
+      "frames": 81,
+      "width": 832,
+      "height": 480,
+      "fps": 16.0,
+      "video_seconds": 5.0625,
+      "torch_peak_allocated_bytes": 11783198720,
+      "output": "run-2.mp4"
+    }
+  ],
+  "status": "passed",
+  "peak_process_rss_bytes": 24597139456,
+  "peak_board_memory_mib": 18715,
+  "memory.peak": "29009047552",
+  "memory.max": "30064771072",
+  "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+}

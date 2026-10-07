@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "base_image": "ghcr.io/hao-ai-lab/fastvideo/fastvideo-dev@sha256:b30fbb7013f965b52cbacc3a2316a4d8503d5fad3522bc5396ac627d1eea80b3",
+  "source": "https://github.com/NVlabs/LongLive.git",
+  "source_revision": "fb16a879f46e604df4a0ca48ce2bf45adfa90352",
+  "engine_directory": "LongLive1.0",
+  "models": [
+    {"id":"Wan-AI/Wan2.1-T2V-1.3B", "revision":"37ec512624d61f7aa208f7ea8140a131f93afc9a", "directory":"wan_models/Wan2.1-T2V-1.3B", "allow_patterns":["config.json", "diffusion_pytorch_model.safetensors", "models_t5_umt5-xxl-enc-bf16.pth", "Wan2.1_VAE.pth", "google/umt5-xxl/*"]},
+    {"id":"Efficient-Large-Model/LongLive-1.3B", "revision":"cda9138d93872ef109d9a74c270184eb3a5acc6e", "directory":"longlive_models", "allow_patterns":["models/longlive_base.pt", "models/lora.pt"]}
+  ],
+  "seed": 20261006,
+  "prompt": "A small red wooden boat moves slowly across a calm mountain lake at sunrise. Gentle ripples spread across the water. Wide shot, stable camera, natural light.",
+  "fps": 16,
+  "width": 832,
+  "height": 480,
+  "denoising_steps": [1000, 750, 500, 250],
+  "cpu_memory_gib": 28
+}
