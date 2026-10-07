@@ -28,3 +28,6 @@ testpaths = ["tests"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/vgpu_local"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src/vgpu_local", "pyproject.toml", "README.md", "LICENSE", "NOTICE", ".gitignore"]

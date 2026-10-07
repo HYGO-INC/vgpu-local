@@ -5,7 +5,9 @@
   "packageManager": "pnpm@9.15.1",
   "scripts": {
     "generate": "node scripts/generate.mjs",
-    "check": "node scripts/generate.mjs --check && uv run --locked pytest"
+    "check": "node scripts/generate.mjs --check && uv run --locked pytest",
+    "release:build": "uv run --locked python scripts/build_release.py",
+    "release:check": "uv run --locked python scripts/check_release.py"
   },
   "devDependencies": {
     "@typespec/compiler": "1.16.0",

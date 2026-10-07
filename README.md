@@ -14,18 +14,26 @@ development stays local; no new packages, images or releases are published yet.
 
 ## Start with the minimum download
 
-From this checkout, with Python 3.12+ and [uv](https://docs.astral.sh/uv/):
+From this checkout, with [uv](https://docs.astral.sh/uv/):
 
 ```sh
-uv tool install .
+uv tool install --python 3.12 .
 vgpu-local doctor
 ```
 
 The default package has **no third-party runtime dependencies**. It does not
 install Kubernetes, Docker, PyTorch, CUDA, models, provider SDKs, a database server
-or a desktop browser. Python itself is a prerequisite and is not included in the
+or a desktop browser. `uv` obtains Python 3.12 if needed, without replacing your
+system Python. Python is an additional download and is not included in the
 package-size measurement. `doctor` invokes an installed `nvidia-smi` when available;
 `doctor --no-probe` skips that invocation. It makes no network requests.
+
+The version request is explicit because `uv tool` does not use this checkout's
+Python pin as its interpreter-selection default. If the executable directory is
+not on PATH, run `uv tool update-shell` and open a new terminal. See
+[uv tool Python selection](https://docs.astral.sh/uv/concepts/tools/#python-versions).
+The package has not been published to PyPI; an unqualified registry install is
+not the current installation route.
 
 If an engine is already running on this computer, inspect it without installing
 another copy or pulling a model:
@@ -56,9 +64,9 @@ Install extras only for features you choose:
 
 ```sh
 # From the checkout; retain already chosen extras when changing this selection.
-uv tool install --reinstall '.[cloud]'
+uv tool install --python 3.12 --reinstall '.[cloud]'
 # Existing cluster support; optionally combined as '.[cloud,kubernetes]'.
-uv tool install --reinstall '.[kubernetes]'
+uv tool install --python 3.12 --reinstall '.[kubernetes]'
 ```
 
 - `cloud`: scoped outbound enrollment and credential renewal; see
@@ -103,7 +111,8 @@ Optional cloud capacity is a separate service-side concern.
 pnpm install --frozen-lockfile
 uv sync --locked
 pnpm check
-uv build --wheel
+pnpm release:build
+pnpm release:check
 ```
 
 Development tooling is larger than the end-user installation. Edit public
@@ -113,3 +122,13 @@ wire compatibility; those identifiers do not install or implement supplier code.
 Hosted spending policy is not part of this package.
 
 Apache-2.0. Local use needs no private repository or package registry.
+
+## Release artifacts
+
+`release:build` builds both the wheel and source distribution in a fresh staging
+directory, verifies their contents against this runtime, then replaces the local
+artifacts. Source packages exclude development history, recipes, tests and cloud
+supplier implementation. `release:check` rejects stale or unexpected archives,
+changed source bytes and mandatory runtime dependencies. CI runs both checks.
+Building does not publish. Any future upload must use the explicit verified
+filenames; do not upload an unchecked `dist/*` glob.

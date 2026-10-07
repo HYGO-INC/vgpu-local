@@ -31,6 +31,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: uv sync --locked
       - run: pnpm check
-      - run: uv build --wheel
+      - run: pnpm release:build
+      - run: pnpm release:check
       - run: uv run --locked python scripts/qualify-starter.py
       - run: uv run vgpu-local inventory --nodes-json examples/nodes.json
