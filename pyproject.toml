@@ -4,7 +4,7 @@ version = "0.1.0a0"
 description = "Local GPU pools, reusable capacity adapters, and opt-in cloud overflow"
 requires-python = ">=3.12"
 license = "Apache-2.0"
-dependencies = ["pydantic==2.13.5", "httpx==0.28.1", "rfc8785==0.1.4", "jsonschema==4.26.0"]
+dependencies = ["pydantic==2.14.0", "httpx==0.28.1", "rfc8785==0.1.4", "jsonschema==4.26.0"]
 
 [project.scripts]
 vgpu-local = "vgpu_local.cli:main"
