@@ -116,6 +116,24 @@ def test_windows_run_entry_in_the_real_registry(tmp_path):
     assert backend.status()["enabled"] is False
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="the real registry exists only on Windows")
+def test_windows_run_key_is_created_where_a_profile_has_none(tmp_path):
+    import winreg
+
+    # A key no profile has stands in for a Run key that does not exist yet.
+    path = rf"Software\vGPU autostart test {uuid.uuid4()}"
+    backend = WindowsRun(registry=autostart._WinReg(path), value="vGPU")
+    try:
+        assert backend.status()["enabled"] is False
+        backend.disable()
+        backend.enable(tmp_path / "state")
+        assert backend.status()["enabled"] is True
+        backend.disable()
+        assert backend.status()["enabled"] is False
+    finally:
+        winreg.DeleteKey(winreg.HKEY_CURRENT_USER, path)
+
+
 def test_unknown_platforms_are_refused():
     with pytest.raises(UnsupportedCapability, match="autostart_unsupported_platform"):
         for_platform("aix")

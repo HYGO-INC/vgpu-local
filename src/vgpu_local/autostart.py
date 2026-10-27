@@ -52,9 +52,14 @@ class WindowsRun:
 
 
 class _WinReg:
+    """The current user's `path`: the Run key unless a test names another."""
+
+    def __init__(self, path: str = RUN_KEY):
+        self.path = path
+
     def _key(self, access):
         import winreg
-        return winreg.OpenKey(winreg.HKEY_CURRENT_USER, RUN_KEY, 0, access)
+        return winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.path, 0, access)
 
     def get(self, value):
         import winreg
@@ -66,7 +71,8 @@ class _WinReg:
 
     def set(self, value, line):
         import winreg
-        with self._key(winreg.KEY_SET_VALUE) as key:
+        # A profile may have no Run key yet, as on a fresh Windows runner: create it.
+        with winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, self.path, 0, winreg.KEY_SET_VALUE) as key:
             winreg.SetValueEx(key, value, 0, winreg.REG_SZ, line)
 
     def delete(self, value):
