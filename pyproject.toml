@@ -23,7 +23,7 @@ build-backend = "hatchling.build"
 dev = ["pytest==8.4.2", "datamodel-code-generator[black,isort]==0.83.0",
        "jsonschema==4.26.0", "rfc8785==0.1.4", "filelock==4.0.12",
        "httpx==0.28.1", "keyring==25.7.0", "starlette==1.7.0", "uvicorn==0.54.0"]
-browser = ["playwright==1.63.0"]
+browser = ["playwright==1.64.1"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
