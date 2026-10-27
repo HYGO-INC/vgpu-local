@@ -4,12 +4,12 @@
   "version": "1.0.0",
   "upstream": {
     "repository": "HYGO-INC/shared",
-    "commit": "b24fd64a3ef9ee0bd0f731377b2952ad1cdca672",
+    "commit": "3024734ee457d01cb31d63bce46e2024e49f4c4d",
     "path": "conformance/local-services"
   },
   "files": {
     "cases.json": "27c2d4c5db95bd4418d2f9790fa99e11eec03c176e56700f2bd2c4d5fe2c70b4",
-    "README.md": "1c75c40767d70fd0d288b36c0248ad51c5a1e67604c0180b35b665bbec6251a4",
+    "README.md": "603fcb0c0e784014cf0d8bc6ef7625689d684b0b0e28b65d55ad7e9ec73d388f",
     "LICENSE": "446493be819137e5d1156ad7378d49e68b615eae24a85e4656997d89c2a5df3b"
   }
 }

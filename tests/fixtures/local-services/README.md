@@ -1,8 +1,8 @@
 # Local service security conformance, version 1.0.0
 
 This is the canonical, transport-neutral attack corpus for local services.
-MIFY and vgpu-local run it against their actual network entry points. Tests do
-not need credentials, accounts, GPUs, cloud services or access to this repository.
+Each consumer runs it against its actual network entry points. Tests do not
+need credentials, accounts, GPUs, cloud services or access to this repository.
 This directory alone is MIT licensed for bundling into public consumers.
 
 ## Two explicit policies
@@ -13,11 +13,12 @@ This directory alone is MIT licensed for bundling into public consumers.
 | local-http-bearer | Exact local console origin; absent Origin allowed for native clients | Exact numeric loopback authority and port | Bearer required for every API call |
 
 A hosted website contacting a loopback WebSocket legitimately sends cross-site
-Fetch Metadata. That field cannot replace MIFY's Origin allowlist. The local HTTP
-console rejects cross-site requests even with a correct bearer. Neither policy
-trusts forwarded headers. Reject ambiguous duplicate security headers rather
-than relying on a framework's first/last value rule. Binding to `127.0.0.1` stays
-explicit in each server and is tested separately through its actual listener.
+Fetch Metadata. That field cannot replace the hosted profile's Origin allowlist.
+The local HTTP console rejects cross-site requests even with a correct bearer.
+Neither policy trusts forwarded headers. Reject ambiguous duplicate security
+headers rather than relying on a framework's first/last value rule. Binding to
+`127.0.0.1` stays explicit in each server and is tested separately through its
+actual listener.
 
 `cases.json` contains ordered header values, including duplicates. Start from
 `baseHeaders`; each case replaces headers case-insensitively. An empty list
@@ -54,8 +55,9 @@ Existing ws, Node HTTP, Starlette and Uvicorn handle transports and parsing.
 
 Loopback binding and browser Origin checks protect against remote machines and
 untrusted browser origins; they do not authenticate an OS user or a native
-program. A local program can forge Origin. MIFY's intentional Origin-less native
-access does not isolate other OS users, local processes, extensions or a
-compromised allowed website. The bearer profile adds a secret but does not
-sandbox processes that can read that secret. These are boundary conformance
-tests, not an audit of all runtime commands, browsers or terminal capabilities.
+program. A local program can forge Origin. The hosted profile's intentional
+Origin-less native access does not isolate other OS users, local processes,
+extensions or a compromised allowed website. The bearer profile adds a secret but
+does not sandbox processes that can read that secret. These are boundary
+conformance tests, not an audit of all runtime commands, browsers or terminal
+capabilities.
